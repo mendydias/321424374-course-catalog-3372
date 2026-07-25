@@ -1,0 +1,22 @@
+{
+  "name": "eei3372-dev",
+  "build": {
+    "dockerfile": "Containerfile",
+    "context": "."
+  },
+  "remoteUser": "dev",
+  "updateRemoteUserUID": true,
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached,relabel=shared",
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localEnv:HOME}/.local/share/opencode/auth.json,target=/home/dev/.local/share/opencode/auth.json,type=bind,readonly,relabel=shared"
+  ],
+  "postCreateCommand": "direnv allow /workspace || true",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "fish"
+      }
+    }
+  }
+}

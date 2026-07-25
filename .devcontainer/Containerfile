@@ -1,0 +1,47 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    curl wget ca-certificates \
+    fish \
+    ripgrep fd-find \
+    direnv \
+    unzip xz-utils \
+    sudo \
+    pkg-config \
+    && ln -s /usr/bin/fdfind /usr/local/bin/fd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Node LTS (bookworm's apt node lags behind what mason.nvim/LSPs expect)
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Neovim latest stable (apt version on bookworm is stale)
+RUN curl -fsSL -o /tmp/nvim.tar.gz \
+      https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz \
+    && tar -C /opt -xzf /tmp/nvim.tar.gz \
+    && ln -s /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim \
+    && rm /tmp/nvim.tar.gz
+
+ARG USER_UID=1000
+ARG USER_GID=1000
+RUN groupadd -g $USER_GID dev \
+    && useradd -m -u $USER_UID -g $USER_GID -s /usr/bin/fish dev \
+    && echo "dev ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/dev \
+    && chmod 0440 /etc/sudoers.d/dev \
+    && mkdir -p /home/dev/.local/share/opencode \
+    && chown -R dev:dev /home/dev
+
+USER dev
+WORKDIR /workspace
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && curl -fsSL https://opencode.ai/install | bash \
+    && mkdir -p /home/dev/.config/fish \
+    && echo 'direnv hook fish | source' >> /home/dev/.config/fish/config.fish
+
+ENV PATH="/home/dev/.local/bin:/home/dev/.opencode/bin:${PATH}"
+
+CMD ["fish", "-l"]
