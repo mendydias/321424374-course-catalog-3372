@@ -4,7 +4,7 @@
 
 - Setup: `uv sync` (creates/uses `.venv/`). No requirements.txt — this is a uv project.
 - Run app: `uv run python main.py`
-- Tests: `uv run pytest` (all), `uv run pytest tests/test_models.py` (file),
+- Tests: `uv run pytest` (all), `uv run pytest tests/test_controllers.py` (file),
   `uv run pytest -k <name>` (single test)
 - Python >= 3.11 required.
 
