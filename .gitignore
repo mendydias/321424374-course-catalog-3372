@@ -1,0 +1,15 @@
+# Agent-related
+.agents/
+AGENTS.md
+skills-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
