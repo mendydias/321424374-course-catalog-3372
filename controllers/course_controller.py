@@ -1,6 +1,7 @@
 import re
 
-from models import Course, get_department, list_departments
+from data import get_department, list_departments
+from models import Course
 
 CODE_PATTERN = re.compile(r"[A-Za-z]{3}\d{4}")
 LEVEL_RANGE = range(1, 5)
@@ -41,4 +42,4 @@ def parse_course_code(code: str) -> Course:
             f"{CREDIT_RANGE.start} and {CREDIT_RANGE.stop - 1}."
         )
 
-    return Course(code=raw, department=department, level=level, credits=credits)
+    return Course(code=raw, department=department.name, level=level, credits=credits)

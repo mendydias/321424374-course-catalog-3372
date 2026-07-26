@@ -1,17 +1,7 @@
 from models.course import Course
-from models.department import (
-    get_department,
-    add_department,
-    update_department,
-    remove_department,
-    list_departments,
-)
+from models.department import Department
 
 __all__ = [
     "Course",
-    "get_department",
-    "add_department",
-    "update_department",
-    "remove_department",
-    "list_departments",
+    "Department",
 ]
