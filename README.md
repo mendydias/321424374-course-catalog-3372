@@ -32,11 +32,14 @@ Built as **MVC with a repository abstraction**, so the storage layer can later b
 project/
 ├── main.py                  # Entry point
 ├── models/
+│   ├── __init__.py          # Facade — re-exports public API
 │   ├── course.py            # Course entity + validation rules
 │   └── repository.py        # ICourseRepository interface + in-memory implementation
 ├── controllers/
+│   ├── __init__.py          # Facade — re-exports public API
 │   └── course_controller.py # Parsing, validation, use-case orchestration
 ├── views/
+│   ├── __init__.py          # Facade — re-exports public API
 │   └── cli_view.py          # CLI input/output, formatting
 └── tests/
     ├── test_models.py
@@ -48,6 +51,7 @@ project/
 - **Model** — `Course` entity plus `ICourseRepository`; `InMemoryCourseRepository` keys courses by code for O(1) lookup and natural uniqueness enforcement.
 - **View** — Owns all `input()`/`print()`; no business logic.
 - **Controller** — Owns parsing and validation rules; talks to the repository only through its interface.
+- **Facade convention** — Every package (`models`, `controllers`, `views`) re-exports its public symbols from `__init__.py`. Import from the package namespace: `from models import Course`, never `from models.course import Course`. When adding a new module, update the `__init__.py` in the same change.
 
 ## Getting Started
 
@@ -56,15 +60,14 @@ project/
 git clone <repo-url>
 cd project
 
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate
-
-# Install dev dependencies
-pip install -r requirements-dev.txt
+# Install dependencies (uses uv — no manual venv needed)
+uv sync
 
 # Run the application
-python main.py
+uv run python main.py
+
+# Run tests
+uv run pytest
 ```
 
 ## Validation Rules
