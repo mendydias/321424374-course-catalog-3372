@@ -70,7 +70,7 @@ python main.py
 ## Validation Rules
 
 | Rule | Behavior |
-|---|---|
+| --- | --- |
 | Code format | Must match `[A-Za-z]{3}\d{4}`; rejected otherwise |
 | Code casing | Auto-normalized to uppercase |
 | Department | Only `EE` recognized; others rejected with a clear message |

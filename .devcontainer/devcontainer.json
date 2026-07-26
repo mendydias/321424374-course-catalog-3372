@@ -9,7 +9,8 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached,relabel=shared",
   "workspaceFolder": "/workspace",
   "mounts": [
-    "source=${localEnv:HOME}/.local/share/opencode/auth.json,target=/home/dev/.local/share/opencode/auth.json,type=bind,readonly,relabel=shared"
+    "source=${localEnv:HOME}/.local/share/opencode/auth.json,target=/home/dev/.local/share/opencode/auth.json,type=bind,readonly,relabel=shared",
+    "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,readonly,relabel=shared"
   ],
   "postCreateCommand": "direnv allow /workspace || true",
   "customizations": {

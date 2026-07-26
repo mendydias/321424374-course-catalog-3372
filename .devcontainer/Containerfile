@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip xz-utils \
     sudo \
     pkg-config \
+    openssh-client \
     && ln -s /usr/bin/fdfind /usr/local/bin/fd \
     && rm -rf /var/lib/apt/lists/*
 
