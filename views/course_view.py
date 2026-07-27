@@ -7,7 +7,7 @@ from textual.containers import Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Input, Label
 
-from controllers import CourseCodeError, parse_course_code
+from controllers import CourseError, insert_course
 from models import Course
 
 
@@ -32,8 +32,8 @@ class CourseView(Screen):
     def _submit(self) -> None:
         code = self.query_one(Input).value.strip()
         try:
-            course = parse_course_code(code)
-        except CourseCodeError as e:
+            course = insert_course(code, "", 0, "")
+        except CourseError as e:
             error_label = self.query_one("#error", Label)
             error_label.update(str(e))
             error_label.add_class("-visible")

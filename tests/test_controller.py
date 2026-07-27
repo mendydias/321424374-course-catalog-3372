@@ -1,6 +1,7 @@
 import pytest
 
-from controllers import CourseError, save_course
+from controllers import CourseError, insert_course
+from data import clear_courses
 from models import Course
 from models.department import Department
 
@@ -107,9 +108,14 @@ class TestParseCourseCode:
         assert "between 1 and 6" in msg
 
 
-class TestSaveCourse:
+class TestInsertCourse:
+    @pytest.fixture(scope="class", autouse=True)
+    @classmethod
+    def _clear_repo(cls) -> None:
+        clear_courses()
+
     def test_valid(self) -> None:
-        course = save_course("EEI3372", "digital systems", 1, "john smith")
+        course = insert_course("EEI3372", "digital systems", 1, "john smith")
         assert course.code == "EEI3372"
         assert course.name == "Digital systems"
         assert course.semester == 1
@@ -119,27 +125,27 @@ class TestSaveCourse:
         assert course.credits == 3
 
     @pytest.mark.parametrize(
-        ("raw_name", "expected"),
+        ("code", "raw_name", "expected"),
         [
-            ("digital systems", "Digital systems"),
-            ("DIGITAL SYSTEMS", "Digital systems"),
-            ("Digital Systems", "Digital systems"),
+            ("EEI2172", "digital systems", "Digital systems"),
+            ("EEI3172", "DIGITAL SYSTEMS", "Digital systems"),
+            ("EEI4172", "Digital Systems", "Digital systems"),
         ],
     )
-    def test_name_sentence_case_normalization(self, raw_name: str, expected: str) -> None:
-        course = save_course("EEI3372", raw_name, 1, "John Smith")
+    def test_name_sentence_case_normalization(self, code: str, raw_name: str, expected: str) -> None:
+        course = insert_course(code, raw_name, 1, "John Smith")
         assert course.name == expected
 
     @pytest.mark.parametrize(
-        ("raw_lecturer", "expected"),
+        ("code", "raw_lecturer", "expected"),
         [
-            ("john smith", "John Smith"),
-            ("JOHN SMITH", "John Smith"),
-            ("john SMITH", "John Smith"),
+            ("EEI1272", "john smith", "John Smith"),
+            ("EEI2272", "JOHN SMITH", "John Smith"),
+            ("EEI3272", "john SMITH", "John Smith"),
         ],
     )
-    def test_lecturer_title_case_normalization(self, raw_lecturer: str, expected: str) -> None:
-        course = save_course("EEI3372", "Digital Systems", 1, raw_lecturer)
+    def test_lecturer_title_case_normalization(self, code: str, raw_lecturer: str, expected: str) -> None:
+        course = insert_course(code, "Digital Systems", 1, raw_lecturer)
         assert course.lecturer == expected
 
     @pytest.mark.parametrize(
@@ -156,4 +162,9 @@ class TestSaveCourse:
     )
     def test_validation_errors(self, name: str, semester: int, lecturer: str, match: str) -> None:
         with pytest.raises(CourseError, match=match):
-            save_course("EEI3372", name, semester, lecturer)
+            insert_course("EEI3372", name, semester, lecturer)
+
+    def test_duplicate_code_raises_error(self) -> None:
+        insert_course("EEI1372", "Digital Systems", 2, "Jane Doe")
+        with pytest.raises(CourseError, match="already exists"):
+            insert_course("EEI1372", "Digital Systems", 2, "Jane Doe")

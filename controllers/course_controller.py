@@ -1,6 +1,6 @@
 import re
 
-from data import get_department, list_departments
+from data import CourseRepoError, add_course, get_department, list_departments
 from models import Course
 
 CODE_PATTERN = re.compile(r"[A-Za-z]{3}\d{4}")
@@ -75,6 +75,11 @@ def _parse_name_semester_lecturer(
     return course
 
 
-def save_course(code: str, name: str, semester: int, lecturer: str) -> Course:
+def insert_course(code: str, name: str, semester: int, lecturer: str) -> Course:
     course = _parse_course_code(code)
-    return _parse_name_semester_lecturer(course, name, semester, lecturer)
+    _parse_name_semester_lecturer(course, name, semester, lecturer)
+    try:
+        add_course(course)
+    except CourseRepoError as e:
+        raise CourseError(str(e)) from e
+    return course
