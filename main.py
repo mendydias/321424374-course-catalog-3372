@@ -20,6 +20,7 @@ def set_course(course: Course) -> None:
 
 class CourseApp(App):
     TITLE = "ECE Course Catalog Manager"
+    ENABLE_COMMAND_PALETTE = False
 
     def on_mount(self) -> None:
         self.push_screen(CourseView(set_course))
