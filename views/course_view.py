@@ -5,7 +5,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import Screen
-from textual.widgets import Button, Input, Label
+from textual.widgets import Button, Footer, Header, Input, Label
 
 from controllers import CourseCodeError, parse_course_code
 from models import Course
@@ -20,10 +20,12 @@ class CourseView(Screen):
         self._on_submit = on_submit
 
     def compose(self) -> ComposeResult:
+        yield Header()
         with Vertical(id="form-card"):
             yield Input(placeholder="Course code (e.g. EEI3372)")
             yield Button("Submit", variant="primary")
             yield Label(id="error")
+        yield Footer()
 
     @on(Input.Submitted)
     @on(Button.Pressed)

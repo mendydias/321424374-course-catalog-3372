@@ -49,6 +49,24 @@ Button.-primary:focus {
     text-style: bold underline;
 }
 
+/* --- Header ----------------------------------------------------------- */
+
+Header {
+    background: #0e0f13;
+    color: #e6e6ea;
+}
+
+/* --- Footer ----------------------------------------------------------- */
+
+Footer {
+    background: #0e0f13;
+    color: #e6e6ea;
+}
+
+Footer > .footer--key {
+    color: #5b8cff;
+}
+
 #error {
     margin: 1 0 0 0;
     color: #ff5c5c;
