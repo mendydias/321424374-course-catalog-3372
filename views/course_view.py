@@ -2,6 +2,8 @@ from collections.abc import Callable
 
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding
+from textual.containers import Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Input, Label
 
@@ -10,14 +12,18 @@ from models import Course
 
 
 class CourseView(Screen):
+    CSS_PATH = "course_view.tcss"
+    BINDINGS = [Binding("escape", "app.quit")]
+
     def __init__(self, on_submit: Callable[[Course], None]) -> None:
         super().__init__()
         self._on_submit = on_submit
 
     def compose(self) -> ComposeResult:
-        yield Input(placeholder="Course code (e.g. EEI3372)")
-        yield Button("Submit", variant="primary")
-        yield Label(id="error")
+        with Vertical(id="form-card"):
+            yield Input(placeholder="Course code (e.g. EEI3372)")
+            yield Button("Submit", variant="primary")
+            yield Label(id="error")
 
     @on(Input.Submitted)
     @on(Button.Pressed)

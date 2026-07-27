@@ -1,0 +1,79 @@
+/* ---------------------------------------------------------------- */
+/*  Modern form theme for CourseView (and similar form-style Screens) */
+/* ---------------------------------------------------------------- */
+
+Screen {
+    background: #14161c;
+    color: #e6e6ea;
+    align: center middle;
+}
+
+/* --- Form card ---------------------------------------------------- */
+/* Wrap your widgets in a Vertical/Container with id="form-card" for
+   the card look. If you don't want to touch the Python, the rules
+   below on Input/Button/Label still work fine directly on Screen. */
+
+#form-card {
+    width: 60;
+    padding: 2 4;
+    background: #1c1f28;
+    border: round #2e3340;
+    border-title-color: #e6e6ea;
+}
+
+/* --- Input ---------------------------------------------------------- */
+
+Input {
+    margin: 1 0;
+    background: #22252f;
+    color: #e6e6ea;
+    border: tall #2e3340;
+    padding: 0 1;
+}
+
+Input:focus {
+    border: tall #5b8cff;
+    background: #262a35;
+}
+
+Input.-invalid {
+    border: tall #ff5c5c;
+}
+
+/* --- Button ----------------------------------------------------------- */
+
+Button {
+    margin: 1 0 0 0;
+    width: 100%;
+    text-style: bold;
+}
+
+Button.-primary {
+    background: #5b8cff;
+    color: #0e0f13;
+    border: none;
+}
+
+Button.-primary:hover {
+    background: #7aa2ff;
+}
+
+Button.-primary:focus {
+    text-style: bold underline;
+}
+
+/* --- Error label -------------------------------------------------- */
+
+#error {
+    margin: 1 0 0 0;
+    color: #ff5c5c;
+    text-style: bold;
+    height: auto;
+    min-height: 1;
+    content-align: center middle;
+    width: 100%;
+}
+
+#error:empty {
+    display: none;
+}
