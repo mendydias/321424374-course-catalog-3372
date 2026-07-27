@@ -8,14 +8,14 @@ LEVEL_RANGE = range(1, 5)
 CREDIT_RANGE = range(1, 7)
 
 
-class CourseCodeError(ValueError):
+class CourseError(ValueError):
     pass
 
 
-def parse_course_code(code: str) -> Course:
+def _parse_course_code(code: str) -> Course:
     raw = code.strip().upper()
     if not CODE_PATTERN.fullmatch(raw):
-        raise CourseCodeError(
+        raise CourseError(
             f"Invalid course code format: '{code}'. "
             f"Expected 3 letters followed by 4 digits (e.g. EEI3372)."
         )
@@ -24,22 +24,57 @@ def parse_course_code(code: str) -> Course:
     department = get_department(dept_code)
     if department is None:
         supported = ", ".join(sorted(list_departments()))
-        raise CourseCodeError(
+        raise CourseError(
             f"Unknown department code '{dept_code}'. Supported codes: {supported}."
         )
 
     level = int(raw[3])
     if level not in LEVEL_RANGE:
-        raise CourseCodeError(
+        raise CourseError(
             f"Academic level {level} is out of range. Must be between "
             f"{LEVEL_RANGE.start} and {LEVEL_RANGE.stop - 1}."
         )
 
     credits = int(raw[4])
     if credits not in CREDIT_RANGE:
-        raise CourseCodeError(
+        raise CourseError(
             f"Credit count {credits} is out of range. Must be between "
             f"{CREDIT_RANGE.start} and {CREDIT_RANGE.stop - 1}."
         )
 
-    return Course(code=raw, department=department.name, level=level, credits=credits)
+    return Course(code=raw, department=department, level=level, credits=credits)
+
+
+def _parse_name_semester_lecturer(
+    course: Course, name: str, semester: int, lecturer: str,
+) -> Course:
+    name = name.strip()
+    if not name:
+        raise CourseError("Course name cannot be empty.")
+    if len(name) <= 3:
+        raise CourseError(
+            f"Course name must be longer than 3 characters, got {len(name)}."
+        )
+    course.name = name[0].upper() + name[1:].lower()
+
+    if semester <= 0 or semester >= 9:
+        raise CourseError(
+            f"Semester must be between 1 and 8, got {semester}."
+        )
+    course.semester = semester
+
+    lecturer = lecturer.strip()
+    if not lecturer:
+        raise CourseError("Lecturer name cannot be empty.")
+    if len(lecturer) <= 3:
+        raise CourseError(
+            f"Lecturer name must be longer than 3 characters, got {len(lecturer)}."
+        )
+    course.lecturer = lecturer.title()
+
+    return course
+
+
+def save_course(code: str, name: str, semester: int, lecturer: str) -> Course:
+    course = _parse_course_code(code)
+    return _parse_name_semester_lecturer(course, name, semester, lecturer)

@@ -1,6 +1,6 @@
-from controllers.course_controller import CourseCodeError, parse_course_code
+from controllers.course_controller import CourseError, save_course
 
 __all__ = [
-    "CourseCodeError",
-    "parse_course_code",
+    "CourseError",
+    "save_course",
 ]
