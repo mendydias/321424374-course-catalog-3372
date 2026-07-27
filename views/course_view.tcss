@@ -56,6 +56,7 @@ Button.-primary:focus {
     height: auto;
     min-height: 1;
     content-align: center middle;
+    text-wrap: wrap;
     width: 100%;
 }
 
