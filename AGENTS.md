@@ -27,6 +27,11 @@
   `from models.course import Course`. When adding a new module, update the
   package's `__init__.py` in the same change.
 
+## Documentation
+
+- Textual API docs fetched and saved in `.docs/` as markdown.
+  Reference these for widget usage, screen patterns, and app lifecycle.
+
 ## Quirks
 
 - `textual` is a dependency even though the README describes a plain CLI view;
