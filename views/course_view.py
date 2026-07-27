@@ -34,6 +34,7 @@ class CourseView(Screen):
         except CourseCodeError as e:
             error_label = self.query_one("#error", Label)
             error_label.update(str(e))
+            error_label.add_class("-visible")
             inp = self.query_one(Input)
             inp.clear()
             inp.focus()
