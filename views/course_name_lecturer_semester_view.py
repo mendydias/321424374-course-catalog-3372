@@ -65,5 +65,4 @@ class CourseNameLecturerSemesterView(Screen):
             return
 
         self._on_submit(self._course)
-        print(self._course)
-        self.app.exit()
+        self.app.exit(result=self._course)

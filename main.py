@@ -28,4 +28,6 @@ class CourseApp(App):
 
 if __name__ == "__main__":
     app = CourseApp()
-    app.run()
+    course = app.run() or _state.course
+    if course:
+        print(course)
