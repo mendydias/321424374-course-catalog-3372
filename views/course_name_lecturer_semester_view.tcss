@@ -1,0 +1,94 @@
+Screen {
+    background: #14161c;
+    color: #e6e6ea;
+    align: center middle;
+}
+
+#form-card {
+    width: 60;
+    padding: 2 4;
+    background: #1c1f28;
+    border: round #2e3340;
+    border-title-color: #e6e6ea;
+}
+
+#course-code,
+#department {
+    margin: 0 0 1 0;
+    text-style: bold;
+    color: #a0a4b0;
+}
+
+Input {
+    margin: 1 0;
+    background: #22252f;
+    color: #e6e6ea;
+    border: tall #2e3340;
+    padding: 0 1;
+}
+
+Input:focus {
+    border: tall #5b8cff;
+    background: #262a35;
+}
+
+Input.-invalid {
+    border: tall #ff5c5c;
+}
+
+Button {
+    margin: 1 0 0 0;
+    width: 100%;
+    text-style: bold;
+}
+
+Button.-primary {
+    background: #5b8cff;
+    color: #0e0f13;
+    border: none;
+}
+
+Button.-primary:hover {
+    background: #7aa2ff;
+}
+
+Button.-primary:focus {
+    text-style: bold underline;
+}
+
+/* --- Header ----------------------------------------------------------- */
+
+Header {
+    background: #0e0f13;
+    color: #e6e6ea;
+}
+
+/* --- Footer ----------------------------------------------------------- */
+
+Footer {
+    background: #0e0f13;
+    color: #e6e6ea;
+}
+
+Footer > .footer--key {
+    color: #5b8cff;
+}
+
+#error {
+    margin: 1 0 0 0;
+    color: #ff5c5c;
+    text-style: bold;
+    height: auto;
+    min-height: 1;
+    content-align: center middle;
+    text-wrap: wrap;
+    width: 100%;
+}
+
+#error {
+    display: none;
+}
+
+#error.-visible {
+    display: block;
+}

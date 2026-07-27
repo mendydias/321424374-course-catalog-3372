@@ -29,5 +29,3 @@ class CourseApp(App):
 if __name__ == "__main__":
     app = CourseApp()
     app.run()
-    if _state.course:
-        print(_state.course)

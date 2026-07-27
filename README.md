@@ -10,7 +10,7 @@ Course codes follow a fixed format — 3 letters + 4 digits (e.g., `EEI3372`). E
 - **Academic Level** — 1st digit (1–4)
 - **Credit Count** — 2nd digit (1–6)
 
-The user is then prompted for the remaining descriptive fields: course name, semester (Odd/Even), and lecturer's name.
+The user is then prompted for the remaining descriptive fields: course name, semester number (1–8), and lecturer's name.
 
 ## Features
 
@@ -79,6 +79,6 @@ uv run pytest
 | Department | Only `EE` recognized; others rejected with a clear message |
 | Academic Level | Must be 1–4 |
 | Credit Count | Must be 1–6 |
-| Semester | Accepts "Odd"/"Even" case-insensitively; stored in consistent format |
+| Semester | Must be an integer 1–8; rejected otherwise |
 | Uniqueness | Duplicate course codes rejected on add |
 | Existence checks | Search/Update/Delete confirm the course exists before proceeding |

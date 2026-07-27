@@ -7,8 +7,10 @@ from textual.containers import Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Input, Label
 
-from controllers import CourseError, insert_course
+from controllers import CourseError, create_course
 from models import Course
+
+from views.course_name_lecturer_semester_view import CourseNameLecturerSemesterView
 
 
 class CourseView(Screen):
@@ -32,7 +34,7 @@ class CourseView(Screen):
     def _submit(self) -> None:
         code = self.query_one(Input).value.strip()
         try:
-            course = insert_course(code, "", 0, "")
+            course = create_course(code)
         except CourseError as e:
             error_label = self.query_one("#error", Label)
             error_label.update(str(e))
@@ -42,4 +44,4 @@ class CourseView(Screen):
             inp.focus()
             return
         self._on_submit(course)
-        self.app.exit()
+        self.app.push_screen(CourseNameLecturerSemesterView(course, self._on_submit))

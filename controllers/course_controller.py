@@ -12,7 +12,7 @@ class CourseError(ValueError):
     pass
 
 
-def _parse_course_code(code: str) -> Course:
+def create_course(code: str) -> Course:
     raw = code.strip().upper()
     if not CODE_PATTERN.fullmatch(raw):
         raise CourseError(
@@ -75,9 +75,8 @@ def _parse_name_semester_lecturer(
     return course
 
 
-def insert_course(code: str, name: str, semester: int, lecturer: str) -> Course:
-    course = _parse_course_code(code)
-    _parse_name_semester_lecturer(course, name, semester, lecturer)
+def register_course(course: Course) -> Course:
+    _parse_name_semester_lecturer(course, course.name, course.semester, course.lecturer)
     try:
         add_course(course)
     except CourseRepoError as e:
