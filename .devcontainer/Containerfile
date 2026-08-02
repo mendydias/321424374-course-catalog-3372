@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ripgrep fd-find \
     direnv \
     unzip xz-utils \
+    gzip \
     sudo \
     pkg-config \
     openssh-client \
@@ -26,6 +27,13 @@ RUN curl -fsSL -o /tmp/nvim.tar.gz \
     && ln -s /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim \
     && rm /tmp/nvim.tar.gz
 
+# tree-sitter CLI: nvim-treesitter `TSInstall` requires `tree-sitter build`
+RUN curl -fsSL -o /tmp/tree-sitter.gz \
+      https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-x64.gz \
+    && gzip -d /tmp/tree-sitter.gz \
+    && install -m 0755 /tmp/tree-sitter /usr/local/bin/tree-sitter \
+    && rm -f /tmp/tree-sitter
+
 ARG USER_UID=1000
 ARG USER_GID=1000
 RUN groupadd -g $USER_GID dev \
@@ -34,6 +42,11 @@ RUN groupadd -g $USER_GID dev \
     && chmod 0440 /etc/sudoers.d/dev \
     && mkdir -p /home/dev/.local/share/opencode \
     && chown -R dev:dev /home/dev
+
+# Host config snapshots (copied from host by initializeCommand each rebuild).
+# nvim + opencode configs are baked in for full separation from the host.
+COPY --chown=dev:dev host-config/nvim/ /home/dev/.config/nvim/
+COPY --chown=dev:dev host-config/opencode/ /home/dev/.config/opencode/
 
 USER dev
 WORKDIR /workspace

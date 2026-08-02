@@ -4,15 +4,21 @@
     "dockerfile": "Containerfile",
     "context": "."
   },
+  "initializeCommand": "rm -rf ${localWorkspaceFolder}/.devcontainer/host-config && mkdir -p ${localWorkspaceFolder}/.devcontainer/host-config/opencode && cp -r ${localEnv:HOME}/.config/nvim ${localWorkspaceFolder}/.devcontainer/host-config/nvim && tar -C ${localEnv:HOME}/.config/opencode --exclude=node_modules -cf - . | tar -xf - -C ${localWorkspaceFolder}/.devcontainer/host-config/opencode",
   "remoteUser": "dev",
   "updateRemoteUserUID": true,
+  "runArgs": ["--userns=keep-id"],
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached,relabel=shared",
   "workspaceFolder": "/workspace",
   "mounts": [
     "source=${localEnv:HOME}/.local/share/opencode/auth.json,target=/home/dev/.local/share/opencode/auth.json,type=bind,readonly,relabel=shared",
-    "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,readonly,relabel=shared"
+    "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,readonly,relabel=shared",
+    "source=eei3372-nvim-data,target=/home/dev/.local/share/nvim,type=volume",
+    "source=eei3372-opencode-data,target=/home/dev/.local/share/opencode,type=volume"
   ],
+  "onCreateCommand": "direnv allow /workspace || true",
   "postCreateCommand": "direnv allow /workspace || true",
+  "forwardPorts": [],
   "customizations": {
     "vscode": {
       "settings": {
