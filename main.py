@@ -11,23 +11,23 @@ class AppState:
     course: Course | None = field(default=None)
 
 
-_state = AppState()
-
-
-def set_course(course: Course) -> None:
-    _state.course = course
-
-
 class CourseApp(App):
     TITLE = "ECE Course Catalog Manager"
     ENABLE_COMMAND_PALETTE = False
 
+    def __init__(self, state: AppState | None = None) -> None:
+        super().__init__()
+        self.state = state if state is not None else AppState()
+
+    def set_course(self, course: Course) -> None:
+        self.state.course = course
+
     def on_mount(self) -> None:
-        self.push_screen(CourseView(set_course))
+        self.push_screen(CourseView(self.set_course))
 
 
 if __name__ == "__main__":
     app = CourseApp()
-    course = app.run() or _state.course
+    course = app.run() or app.state.course
     if course:
         print(course)

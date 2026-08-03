@@ -1,19 +1,12 @@
 import pytest
 
 from controllers import CourseError, create_course, register_course
-from data import clear_courses
-from models import Course
-from models.department import Department
-
-
-def _make_course_from_code(code: str) -> Course:
-    from controllers.course_controller import create_course as _priv
-    return _priv(code)
+from models import Course, Department
 
 
 class TestParseCourseCode:
     def test_parse_valid_code(self) -> None:
-        course = _make_course_from_code("EEI3372")
+        course = create_course("EEI3372")
         assert course == Course(
             code="EEI3372",
             department=Department(code="EE", name="Electrical and Computer Engineering"),
@@ -31,7 +24,7 @@ class TestParseCourseCode:
         ],
     )
     def test_case_normalization(self, raw: str) -> None:
-        course = _make_course_from_code(raw)
+        course = create_course(raw)
         assert course.code == "EEI3372"
 
     @pytest.mark.parametrize(
@@ -42,7 +35,7 @@ class TestParseCourseCode:
         ],
     )
     def test_level_boundaries_valid(self, raw: str, expected_level: int) -> None:
-        course = _make_course_from_code(raw)
+        course = create_course(raw)
         assert course.level == expected_level
 
     @pytest.mark.parametrize(
@@ -53,12 +46,12 @@ class TestParseCourseCode:
         ],
     )
     def test_credit_boundaries_valid(self, raw: str, expected_credits: int) -> None:
-        course = _make_course_from_code(raw)
+        course = create_course(raw)
         assert course.credits == expected_credits
 
     def test_unknown_department(self) -> None:
         with pytest.raises(CourseError) as exc:
-            _make_course_from_code("XXI3372")
+            create_course("XXI3372")
         msg = str(exc.value)
         assert "Unknown department code 'XX'" in msg
         assert "EE" in msg
@@ -76,7 +69,7 @@ class TestParseCourseCode:
     )
     def test_malformed_input(self, raw: str) -> None:
         with pytest.raises(CourseError, match="Invalid course code format"):
-            _make_course_from_code(raw)
+            create_course(raw)
 
     @pytest.mark.parametrize(
         ("raw", "level"),
@@ -87,7 +80,7 @@ class TestParseCourseCode:
     )
     def test_level_out_of_range(self, raw: str, level: int) -> None:
         with pytest.raises(CourseError) as exc:
-            _make_course_from_code(raw)
+            create_course(raw)
         msg = str(exc.value)
         assert str(level) in msg
         assert "between 1 and 4" in msg
@@ -101,7 +94,7 @@ class TestParseCourseCode:
     )
     def test_credits_out_of_range(self, raw: str, credits: int) -> None:
         with pytest.raises(CourseError) as exc:
-            _make_course_from_code(raw)
+            create_course(raw)
         msg = str(exc.value)
         assert "Credit count" in msg
         assert str(credits) in msg
@@ -109,11 +102,6 @@ class TestParseCourseCode:
 
 
 class TestRegisterCourse:
-    @pytest.fixture(scope="class", autouse=True)
-    @classmethod
-    def _clear_repo(cls) -> None:
-        clear_courses()
-
     @staticmethod
     def _make_course(code: str, name: str, semester: int, lecturer: str) -> Course:
         course = create_course(code)

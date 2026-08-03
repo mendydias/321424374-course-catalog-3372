@@ -3,24 +3,18 @@ import pytest
 from data import (
     CourseRepoError,
     add_course,
-    clear_courses,
     course_exists,
     get_course,
     list_courses,
     remove_course,
     update_course,
 )
-from models import Course
-from models.department import Department
+from models import Course, Department
 
 _DEPT = Department(code="EE", name="Electrical and Computer Engineering")
 
 
 class TestCourseRepository:
-    @pytest.fixture(scope="class", autouse=True)
-    @classmethod
-    def _clear_repo(cls) -> None:
-        clear_courses()
 
     def test_add_and_get(self) -> None:
         course = Course(code="EEI1172", department=_DEPT, level=3, credits=3, name="Digital Systems", semester=1, lecturer="John Smith")
@@ -49,7 +43,8 @@ class TestCourseRepository:
         add_course(original)
         updated = Course(code="EEI4172", department=_DEPT, level=3, credits=3, name="New", semester=2, lecturer="B")
         update_course(updated)
-        stored = get_course("EEI4172")
+        stored: Course | None = get_course("EEI4172")
+        assert stored is not None
         assert stored is updated
         assert stored.name == "New"
 
@@ -74,9 +69,7 @@ class TestCourseRepository:
         add_course(c1)
         add_course(c2)
         snapshot = list_courses()
-        assert "EEI7172" in snapshot
-        assert "EEI8172" in snapshot
-        assert len(snapshot) >= 2
+        assert snapshot == {"EEI7172": c1, "EEI8172": c2}
         assert snapshot is not list_courses()
 
     def test_course_exists(self) -> None:
