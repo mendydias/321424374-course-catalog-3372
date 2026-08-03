@@ -4,7 +4,7 @@
     "dockerfile": "Containerfile",
     "context": "."
   },
-  "initializeCommand": "rm -rf ${localWorkspaceFolder}/.devcontainer/host-config && mkdir -p ${localWorkspaceFolder}/.devcontainer/host-config/opencode && cp -r ${localEnv:HOME}/.config/nvim ${localWorkspaceFolder}/.devcontainer/host-config/nvim && tar -C ${localEnv:HOME}/.config/opencode --exclude=node_modules -cf - . | tar -xf - -C ${localWorkspaceFolder}/.devcontainer/host-config/opencode",
+  "initializeCommand": "rm -rf ${localWorkspaceFolder}/.devcontainer/host-config && mkdir -p ${localWorkspaceFolder}/.devcontainer/host-config/opencode && tar -C ${localEnv:HOME}/.config/opencode --exclude=node_modules -cf - . | tar -xf - -C ${localWorkspaceFolder}/.devcontainer/host-config/opencode",
   "remoteUser": "dev",
   "updateRemoteUserUID": true,
   "runArgs": ["--userns=keep-id"],

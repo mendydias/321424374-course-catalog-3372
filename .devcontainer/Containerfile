@@ -1,4 +1,6 @@
-FROM debian:bookworm-slim
+# trixie (glibc 2.41): prebuilt nvim/tree-sitter binaries require GLIBC_2.39+;
+# bookworm (2.36) is too old.
+FROM debian:trixie-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -15,12 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ln -s /usr/bin/fdfind /usr/local/bin/fd \
     && rm -rf /var/lib/apt/lists/*
 
-# Node LTS (bookworm's apt node lags behind what mason.nvim/LSPs expect)
+# Node LTS (nodesource nodistro repo is distro-agnostic — works on trixie)
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Neovim latest stable (apt version on bookworm is stale)
+# Neovim latest stable (apt version on trixie lags behind)
 RUN curl -fsSL -o /tmp/nvim.tar.gz \
       https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz \
     && tar -C /opt -xzf /tmp/nvim.tar.gz \
@@ -43,19 +45,35 @@ RUN groupadd -g $USER_GID dev \
     && mkdir -p /home/dev/.local/share/opencode \
     && chown -R dev:dev /home/dev
 
-# Host config snapshots (copied from host by initializeCommand each rebuild).
-# nvim + opencode configs are baked in for full separation from the host.
-COPY --chown=dev:dev host-config/nvim/ /home/dev/.config/nvim/
+# Host config snapshot (copied from host by initializeCommand each rebuild).
+# opencode config is baked in for full separation from the host.
 COPY --chown=dev:dev host-config/opencode/ /home/dev/.config/opencode/
 
 USER dev
 WORKDIR /workspace
 
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && curl -fsSL https://opencode.ai/install | bash \
+# opencode
+RUN curl -fsSL https://opencode.ai/install | bash \
     && mkdir -p /home/dev/.config/fish \
     && echo 'direnv hook fish | source' >> /home/dev/.config/fish/config.fish
 
+# LazyVim starter — always latest main at build time (intentionally unpinned)
+RUN curl -fsSL -o /tmp/starter.tar.gz \
+      https://github.com/LazyVim/starter/archive/refs/heads/main.tar.gz \
+    && mkdir -p /home/dev/.config/nvim \
+    && tar --strip-components=1 -C /home/dev/.config/nvim -xzf /tmp/starter.tar.gz \
+    && rm /tmp/starter.tar.gz
+
+# Preinstall LazyVim plugins at build (blocking — build fails on network issues)
+RUN nvim --headless "+Lazy! sync" +qa
+
+# Treesitter parsers (best-effort — :TSInstall is async; rest installs on first run)
+RUN nvim --headless \
+      "+TSInstall python lua vim vimdoc bash json markdown markdown_inline regex query yaml javascript c" \
+      "+sleep 90" +qa || true
+
 ENV PATH="/home/dev/.local/bin:/home/dev/.opencode/bin:${PATH}"
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 CMD ["fish", "-l"]
