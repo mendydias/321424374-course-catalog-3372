@@ -10,7 +10,7 @@ def reset():
     clear_courses()
 
 
-async def _navigate_to_screen2(pilot, app):
+async def _navigate_to_screen2(pilot):
     await pilot.press(*"EEI3372")
     await pilot.press("enter")
     await pilot.pause()
@@ -31,7 +31,7 @@ class TestCourseView:
     async def test_valid_code_navigates_to_screen2(self):
         app = CourseApp()
         async with app.run_test(size=(80, 24)) as pilot:
-            await _navigate_to_screen2(pilot, app)
+            await _navigate_to_screen2(pilot)
             assert "CourseNameLecturerSemesterView" in type(app.screen).__name__
 
 
@@ -40,7 +40,7 @@ class TestCourseNameLecturerSemesterView:
     async def test_displays_code_and_department(self):
         app = CourseApp()
         async with app.run_test(size=(80, 24)) as pilot:
-            await _navigate_to_screen2(pilot, app)
+            await _navigate_to_screen2(pilot)
             assert "EEI3372" in app.screen.query_one("#course-code").content
             assert "Electrical" in app.screen.query_one("#department").content
 
@@ -48,7 +48,7 @@ class TestCourseNameLecturerSemesterView:
     async def test_rejects_empty_name(self):
         app = CourseApp()
         async with app.run_test(size=(80, 24)) as pilot:
-            await _navigate_to_screen2(pilot, app)
+            await _navigate_to_screen2(pilot)
             await pilot.press("enter")
             await pilot.pause()
             error = app.screen.query_one("#error")
@@ -58,7 +58,7 @@ class TestCourseNameLecturerSemesterView:
     async def test_rejects_invalid_semester_string(self):
         app = CourseApp()
         async with app.run_test(size=(80, 24)) as pilot:
-            await _navigate_to_screen2(pilot, app)
+            await _navigate_to_screen2(pilot)
             await pilot.press(*"Digital Systems")
             await pilot.press("tab")
             await pilot.press(*"John Smith")
@@ -74,7 +74,7 @@ class TestCourseNameLecturerSemesterView:
     async def test_successful_submission(self):
         app = CourseApp()
         async with app.run_test(size=(80, 24)) as pilot:
-            await _navigate_to_screen2(pilot, app)
+            await _navigate_to_screen2(pilot)
             await pilot.press(*"Digital Systems")
             await pilot.press("tab")
             await pilot.press(*"John Smith")
