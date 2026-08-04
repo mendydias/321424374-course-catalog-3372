@@ -30,6 +30,8 @@ async def pilot(app):
 
 @pytest_asyncio.fixture
 async def screen2_pilot(pilot):
+    await pilot.click("#add-course")
+    await pilot.pause()
     await pilot.press(*"EEI3372")
     await pilot.press("enter")
     await pilot.pause()

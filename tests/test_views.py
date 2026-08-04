@@ -1,9 +1,23 @@
 import pytest
 
 
+class TestHomeView:
+    @pytest.mark.asyncio
+    async def test_launch_shows_home_view(self, pilot):
+        assert type(pilot.app.screen).__name__ == "HomeView"
+
+    @pytest.mark.asyncio
+    async def test_add_course_button_pushes_department_view(self, pilot):
+        await pilot.click("#add-course")
+        await pilot.pause()
+        assert type(pilot.app.screen).__name__ == "CreateCourseDepartmentView"
+
+
 class TestCreateCourseDepartmentView:
     @pytest.mark.asyncio
     async def test_invalid_code_shows_error(self, pilot):
+        await pilot.click("#add-course")
+        await pilot.pause()
         await pilot.press(*"bads")
         await pilot.press("enter")
         await pilot.pause()
