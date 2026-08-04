@@ -25,8 +25,16 @@ class CourseApp(App):
     def set_course(self, course: Course) -> None:
         self._course = course
 
+    def reset_course(self) -> None:
+        self._course = Course(
+            code="",
+            department=Department(code="", name=""),
+            level=0,
+            credits=0,
+        )
+
     def on_mount(self) -> None:
-        self.push_screen(HomeView(self.set_course))
+        self.push_screen(HomeView(self.set_course, self.reset_course))
 
 
 if __name__ == "__main__":

@@ -16,9 +16,14 @@ class HomeView(Screen):
     CSS_PATH = "home_view.tcss"
     BINDINGS = [Binding("escape", "app.quit")]
 
-    def __init__(self, on_submit: Callable[[Course], None]) -> None:
+    def __init__(
+        self,
+        on_submit: Callable[[Course], None],
+        on_add: Callable[[], None],
+    ) -> None:
         super().__init__()
         self._on_submit = on_submit
+        self._on_add = on_add
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -29,4 +34,5 @@ class HomeView(Screen):
 
     @on(Button.Pressed, "#add-course")
     def _add_course(self) -> None:
+        self._on_add()
         self.app.push_screen(CreateCourseDepartmentView(self._on_submit))

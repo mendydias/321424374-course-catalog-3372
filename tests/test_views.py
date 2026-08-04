@@ -85,3 +85,16 @@ class TestCreateCourseNameLecturerSemesterView:
         await screen2_pilot.pause()
         assert type(screen2_pilot.app.screen).__name__ == "HomeView"
         assert course_exists("EEI3372")
+
+    @pytest.mark.asyncio
+    async def test_re_add_resets_course_state(self, screen2_pilot, app):
+        await screen2_pilot.press(*"Digital Systems")
+        await screen2_pilot.press("tab")
+        await screen2_pilot.press(*"John Smith")
+        await screen2_pilot.press("tab")
+        await screen2_pilot.press(*"2")
+        await screen2_pilot.press("enter")
+        await screen2_pilot.pause()
+        await screen2_pilot.click("#add-course")
+        await screen2_pilot.pause()
+        assert app.state().code == ""
