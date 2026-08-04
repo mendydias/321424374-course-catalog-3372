@@ -10,11 +10,13 @@ from textual.widgets import Button, Footer, Header, Input, Label
 from controllers import CourseError, create_course
 from models import Course
 
-from views.course_name_lecturer_semester_view import CourseNameLecturerSemesterView
+from views.create_course_name_lecturer_semester_view import (
+    CreateCourseNameLecturerSemesterView,
+)
 
 
-class CourseView(Screen):
-    CSS_PATH = "course_view.tcss"
+class CreateCourseDepartmentView(Screen):
+    CSS_PATH = "create_course_department_view.tcss"
     BINDINGS = [Binding("escape", "app.quit")]
 
     def __init__(self, on_submit: Callable[[Course], None]) -> None:
@@ -44,4 +46,4 @@ class CourseView(Screen):
             inp.focus()
             return
         self._on_submit(course)
-        self.app.push_screen(CourseNameLecturerSemesterView(course, self._on_submit))
+        self.app.push_screen(CreateCourseNameLecturerSemesterView(course, self._on_submit))

@@ -1,7 +1,9 @@
-from views.course_name_lecturer_semester_view import CourseNameLecturerSemesterView
-from views.course_view import CourseView
+from views.create_course_department_view import CreateCourseDepartmentView
+from views.create_course_name_lecturer_semester_view import (
+    CreateCourseNameLecturerSemesterView,
+)
 
 __all__ = [
-    "CourseNameLecturerSemesterView",
-    "CourseView",
+    "CreateCourseDepartmentView",
+    "CreateCourseNameLecturerSemesterView",
 ]

@@ -11,8 +11,8 @@ from controllers import CourseError, register_course
 from models import Course
 
 
-class CourseNameLecturerSemesterView(Screen):
-    CSS_PATH = "course_name_lecturer_semester_view.tcss"
+class CreateCourseNameLecturerSemesterView(Screen):
+    CSS_PATH = "create_course_name_lecturer_semester_view.tcss"
     BINDINGS = [Binding("escape", "app.quit")]
 
     def __init__(self, course: Course, on_submit: Callable[[Course], None]) -> None:

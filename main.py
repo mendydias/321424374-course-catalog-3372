@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from textual.app import App
 
 from models import Course
-from views import CourseView
+from views import CreateCourseDepartmentView
 
 
 @dataclass
@@ -23,7 +23,7 @@ class CourseApp(App):
         self.state.course = course
 
     def on_mount(self) -> None:
-        self.push_screen(CourseView(self.set_course))
+        self.push_screen(CreateCourseDepartmentView(self.set_course))
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import pytest
 
 
-class TestCourseView:
+class TestCreateCourseDepartmentView:
     @pytest.mark.asyncio
     async def test_invalid_code_shows_error(self, pilot):
         await pilot.press(*"bads")
@@ -12,10 +12,10 @@ class TestCourseView:
 
     @pytest.mark.asyncio
     async def test_valid_code_navigates_to_screen2(self, screen2_pilot):
-        assert "CourseNameLecturerSemesterView" in type(screen2_pilot.app.screen).__name__
+        assert "CreateCourseNameLecturerSemesterView" in type(screen2_pilot.app.screen).__name__
 
 
-class TestCourseNameLecturerSemesterView:
+class TestCreateCourseNameLecturerSemesterView:
     @pytest.mark.asyncio
     async def test_displays_code_and_department(self, screen2_pilot):
         assert "EEI3372" in screen2_pilot.app.screen.query_one("#course-code").content

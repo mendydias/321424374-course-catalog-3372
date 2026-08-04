@@ -44,10 +44,10 @@ project/
 │   └── course_controller.py # Parsing, validation, use-case orchestration
 ├── views/
 │   ├── __init__.py          # Facade — re-exports public API
-│   ├── course_view.py       # Textual screen (code entry)
-│   ├── course_view.tcss     # Stylesheet
-│   ├── course_name_lecturer_semester_view.py  # Textual screen (descriptive fields)
-│   └── course_name_lecturer_semester_view.tcss
+│   ├── create_course_department_view.py  # Textual screen (code entry)
+│   ├── create_course_department_view.tcss # Stylesheet
+│   ├── create_course_name_lecturer_semester_view.py  # Textual screen (descriptive fields)
+│   └── create_course_name_lecturer_semester_view.tcss
 └── tests/
     ├── conftest.py          # Shared fixtures (async Textual pilot, AppState)
     ├── test_controller.py
