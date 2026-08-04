@@ -17,3 +17,6 @@ build/
 .venv/
 venv/
 env/
+
+# Other
+.ignore
