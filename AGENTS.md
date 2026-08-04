@@ -10,6 +10,20 @@
 - View tests are async (Textual `pilot` fixtures) and require the `pytest-asyncio`
   dev dependency.
 
+## Workflow
+
+Work proceeds in three phases, with artifacts stored per feature under
+`.plans/<feature>/` at the repo root (gitignored, so plans never enter version
+control):
+
+1. **Research** — explore the codebase and write findings to
+   `.plans/<feature>/research.md`. Output exact line numbers, filenames, and
+   exact code snippets.
+2. **Plan** — based on the research, suggest a preliminary plan when asked and
+   write it to `.plans/<feature>/plan.md`.
+3. **Implement** — when given the go-ahead, implement `plan.md` and write the
+   summary to `.plans/<feature>/implementation.md`.
+
 ## Project state
 
 - App is a Textual TUI, not a plain CLI. `main.py` runs `CourseApp`, which pushes
