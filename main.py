@@ -1,26 +1,29 @@
-from dataclasses import dataclass, field
+import copy
 
 from textual.app import App
 
-from models import Course
+from models import Course, Department
 from views import HomeView
-
-
-@dataclass
-class AppState:
-    course: Course | None = field(default=None)
 
 
 class CourseApp(App):
     TITLE = "ECE Course Catalog Manager"
     ENABLE_COMMAND_PALETTE = False
 
-    def __init__(self, state: AppState | None = None) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.state = state if state is not None else AppState()
+        self._course = Course(
+            code="",
+            department=Department(code="", name=""),
+            level=0,
+            credits=0,
+        )
+
+    def state(self) -> Course:
+        return copy.deepcopy(self._course)
 
     def set_course(self, course: Course) -> None:
-        self.state.course = course
+        self._course = course
 
     def on_mount(self) -> None:
         self.push_screen(HomeView(self.set_course))

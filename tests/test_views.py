@@ -56,7 +56,7 @@ class TestCreateCourseNameLecturerSemesterView:
         assert "number" in error.content.lower()
 
     @pytest.mark.asyncio
-    async def test_successful_submission(self, screen2_pilot, state):
+    async def test_successful_submission(self, screen2_pilot, app):
         await screen2_pilot.press(*"Digital Systems")
         await screen2_pilot.press("tab")
         await screen2_pilot.press(*"John Smith")
@@ -64,8 +64,10 @@ class TestCreateCourseNameLecturerSemesterView:
         await screen2_pilot.press(*"2")
         await screen2_pilot.press("enter")
         await screen2_pilot.pause()
-        assert state.course is not None
-        assert state.course.code == "EEI3372"
-        assert state.course.name == "Digital systems"
-        assert state.course.semester == 2
-        assert state.course.lecturer == "John Smith"
+        course = app.state()
+        assert course.code == "EEI3372"
+        assert course.name == "Digital systems"
+        assert course.semester == 2
+        assert course.lecturer == "John Smith"
+        course.name = "X"
+        assert app.state().name == "Digital systems"

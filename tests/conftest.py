@@ -2,7 +2,7 @@ import pytest
 import pytest_asyncio
 
 from data import clear_courses
-from main import AppState, CourseApp
+from main import CourseApp
 
 
 @pytest.fixture(autouse=True)
@@ -13,13 +13,8 @@ def clean_repo():
 
 
 @pytest.fixture
-def state() -> AppState:
-    return AppState()
-
-
-@pytest.fixture
-def app(state) -> CourseApp:
-    return CourseApp(state)
+def app() -> CourseApp:
+    return CourseApp()
 
 
 @pytest_asyncio.fixture
