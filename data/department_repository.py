@@ -1,4 +1,4 @@
-from models.department import Department
+from models import Department
 
 _DEPARTMENTS: dict[str, Department] = {
     "EE": Department(code="EE", name="Electrical and Computer Engineering"),

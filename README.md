@@ -14,44 +14,53 @@ The user is then prompted for the remaining descriptive fields: course name, sem
 
 ## Features
 
-- **Add** a course from its code, with full validation and duplicate prevention
-- **View** all courses in a formatted list
-- **Search** for a course by exact code
-- **Filter** courses by academic level and/or semester
-- **Update** a course's lecturer or semester
-- **Delete** a course from the catalog
+- **Add** a course from its code, with full validation and duplicate prevention — *implemented (UI + controller + data)*
+- **View** all courses in a formatted list — *data layer only*
+- **Search** for a course by exact code — *data layer only*
+- **Filter** courses by academic level and/or semester — *not started*
+- **Update** a course's lecturer or semester — *data layer only*
+- **Delete** a course from the catalog — *data layer only*
 - Robust input validation at every step (format, department, ranges, uniqueness, semester enum)
 
 All data is held in memory and resets on each run — no database or file persistence.
 
 ## Architecture
 
-Built as **MVC with a repository abstraction**, so the storage layer can later be swapped for a SQL backend without changing business logic or the CLI.
+Built as **MVC with a repository abstraction**, so the storage layer can later be swapped for a SQL backend without changing business logic or the UI.
 
 ```
 project/
-├── main.py                  # Entry point
+├── main.py                  # Textual app entry point (CourseApp + AppState)
 ├── models/
 │   ├── __init__.py          # Facade — re-exports public API
-│   ├── course.py            # Course entity + validation rules
-│   └── repository.py        # ICourseRepository interface + in-memory implementation
+│   ├── course.py            # Course entity
+│   └── department.py        # Department entity
+├── data/
+│   ├── __init__.py          # Facade — re-exports public API
+│   ├── course_repository.py     # Function-based course repo (add/get/update/remove/list/exists)
+│   └── department_repository.py # Function-based department repo
 ├── controllers/
 │   ├── __init__.py          # Facade — re-exports public API
 │   └── course_controller.py # Parsing, validation, use-case orchestration
 ├── views/
 │   ├── __init__.py          # Facade — re-exports public API
-│   └── cli_view.py          # CLI input/output, formatting
+│   ├── course_view.py       # Textual screen (code entry)
+│   ├── course_view.tcss     # Stylesheet
+│   ├── course_name_lecturer_semester_view.py  # Textual screen (descriptive fields)
+│   └── course_name_lecturer_semester_view.tcss
 └── tests/
-    ├── test_models.py
+    ├── conftest.py          # Shared fixtures (async Textual pilot, AppState)
     ├── test_controller.py
-    ├── test_fuzz.py          # Hypothesis property-based tests
-    └── test_integration.py
+    ├── test_course_repository.py
+    ├── test_fuzz.py          # Hypothesis property-based tests (pending)
+    └── test_views.py
 ```
 
-- **Model** — `Course` entity plus `ICourseRepository`; `InMemoryCourseRepository` keys courses by code for O(1) lookup and natural uniqueness enforcement.
-- **View** — Owns all `input()`/`print()`; no business logic.
-- **Controller** — Owns parsing and validation rules; talks to the repository only through its interface.
-- **Facade convention** — Every package (`models`, `controllers`, `views`) re-exports its public symbols from `__init__.py`. Import from the package namespace: `from models import Course`, never `from models.course import Course`. When adding a new module, update the `__init__.py` in the same change.
+- **Model** — `Course` and `Department` dataclasses; `Course` derives department, level, and credits from its code.
+- **Data** — Module-level function repositories (`data/`), not classes or interfaces. Courses are keyed by uppercase code in a module-level dict for O(1) lookup and natural uniqueness enforcement; `clear_courses()` exists for test isolation.
+- **View** — Textual `Screen` subclasses own all UI and formatting; no business logic, no `print()`.
+- **Controller** — Owns parsing and validation rules; reaches storage only through the `data` facade.
+- **Facade convention** — Every package (`models`, `controllers`, `views`, `data`) re-exports its public symbols from `__init__.py`. Import from the package namespace: `from models import Course`, never `from models.course import Course`. When adding a new module, update the `__init__.py` in the same change.
 
 ## Getting Started
 
