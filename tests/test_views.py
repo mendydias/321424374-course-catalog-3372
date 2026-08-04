@@ -1,5 +1,7 @@
 import pytest
 
+from data import course_exists
+
 
 class TestHomeView:
     @pytest.mark.asyncio
@@ -71,3 +73,15 @@ class TestCreateCourseNameLecturerSemesterView:
         assert course.lecturer == "John Smith"
         course.name = "X"
         assert app.state().name == "Digital systems"
+
+    @pytest.mark.asyncio
+    async def test_submission_returns_to_home_view(self, screen2_pilot):
+        await screen2_pilot.press(*"Digital Systems")
+        await screen2_pilot.press("tab")
+        await screen2_pilot.press(*"John Smith")
+        await screen2_pilot.press("tab")
+        await screen2_pilot.press(*"2")
+        await screen2_pilot.press("enter")
+        await screen2_pilot.pause()
+        assert type(screen2_pilot.app.screen).__name__ == "HomeView"
+        assert course_exists("EEI3372")

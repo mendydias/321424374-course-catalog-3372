@@ -65,4 +65,6 @@ class CreateCourseNameLecturerSemesterView(Screen):
             return
 
         self._on_submit(self._course)
-        self.app.exit(result=self._course)
+        self.app.notify(f"Course {self._course.code} registered.")
+        while len(self.app.screen_stack) > 2:
+            self.app.pop_screen()
