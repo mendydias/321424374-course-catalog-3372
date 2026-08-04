@@ -20,7 +20,7 @@ Screen {
 }
 
 Input {
-    margin: 1 0;
+    margin: 0 0;
     background: #22252f;
     color: #e6e6ea;
     border: tall #2e3340;
@@ -40,6 +40,18 @@ Button {
     margin: 1 0 0 0;
     width: 100%;
     text-style: bold;
+}
+
+#buttons {
+    height: auto;
+}
+
+#buttons Button {
+    width: 1fr;
+}
+
+#back {
+    margin-right: 1;
 }
 
 Button.-primary {

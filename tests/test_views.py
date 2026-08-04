@@ -30,6 +30,31 @@ class TestCreateCourseDepartmentView:
     async def test_valid_code_navigates_to_screen2(self, screen2_pilot):
         assert "CreateCourseNameLecturerSemesterView" in type(screen2_pilot.app.screen).__name__
 
+    @pytest.mark.asyncio
+    async def test_back_button_returns_to_home(self, pilot):
+        await pilot.click("#add-course")
+        await pilot.pause()
+        await pilot.click("#back")
+        await pilot.pause()
+        assert type(pilot.app.screen).__name__ == "HomeView"
+
+    @pytest.mark.asyncio
+    async def test_escape_returns_to_home(self, pilot):
+        await pilot.click("#add-course")
+        await pilot.pause()
+        await pilot.press("escape")
+        await pilot.pause()
+        assert type(pilot.app.screen).__name__ == "HomeView"
+
+    @pytest.mark.asyncio
+    async def test_back_button_does_not_trigger_submit(self, pilot):
+        await pilot.click("#add-course")
+        await pilot.pause()
+        await pilot.press(*"bads")
+        await pilot.click("#back")
+        await pilot.pause()
+        assert type(pilot.app.screen).__name__ == "HomeView"
+
 
 class TestCreateCourseNameLecturerSemesterView:
     @pytest.mark.asyncio
@@ -98,3 +123,15 @@ class TestCreateCourseNameLecturerSemesterView:
         await screen2_pilot.click("#add-course")
         await screen2_pilot.pause()
         assert app.state().code == ""
+
+    @pytest.mark.asyncio
+    async def test_back_button_returns_to_department(self, screen2_pilot):
+        await screen2_pilot.click("#back")
+        await screen2_pilot.pause()
+        assert type(screen2_pilot.app.screen).__name__ == "CreateCourseDepartmentView"
+
+    @pytest.mark.asyncio
+    async def test_escape_returns_to_department(self, screen2_pilot):
+        await screen2_pilot.press("escape")
+        await screen2_pilot.pause()
+        assert type(screen2_pilot.app.screen).__name__ == "CreateCourseDepartmentView"

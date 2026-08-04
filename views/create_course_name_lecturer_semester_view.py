@@ -3,7 +3,7 @@ from collections.abc import Callable
 from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical
+from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Input, Label
 
@@ -13,7 +13,7 @@ from models import Course
 
 class CreateCourseNameLecturerSemesterView(Screen):
     CSS_PATH = "create_course_name_lecturer_semester_view.tcss"
-    BINDINGS = [Binding("escape", "app.quit")]
+    BINDINGS = [Binding("escape", "app.pop_screen")]
 
     def __init__(self, course: Course, on_submit: Callable[[Course], None]) -> None:
         super().__init__()
@@ -28,7 +28,9 @@ class CreateCourseNameLecturerSemesterView(Screen):
             yield Input(placeholder="Course name", id="name")
             yield Input(placeholder="Lecturer name", id="lecturer")
             yield Input(placeholder="Semester (1-8)", id="semester")
-            yield Button("Next", variant="primary")
+            with Horizontal(id="buttons"):
+                yield Button("Back", id="back")
+                yield Button("Next", id="next", variant="primary")
             yield Label(id="error")
         yield Footer()
 
@@ -38,7 +40,7 @@ class CreateCourseNameLecturerSemesterView(Screen):
         error_label.add_class("-visible")
 
     @on(Input.Submitted)
-    @on(Button.Pressed)
+    @on(Button.Pressed, "#next")
     def _submit(self) -> None:
         name = self.query_one("#name", Input).value.strip()
         lecturer = self.query_one("#lecturer", Input).value.strip()
@@ -68,3 +70,7 @@ class CreateCourseNameLecturerSemesterView(Screen):
         self.app.notify(f"Course {self._course.code} registered.")
         while len(self.app.screen_stack) > 2:
             self.app.pop_screen()
+
+    @on(Button.Pressed, "#back")
+    def _back(self) -> None:
+        self.app.pop_screen()

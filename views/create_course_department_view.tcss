@@ -35,6 +35,18 @@ Button {
     text-style: bold;
 }
 
+#buttons {
+    height: auto;
+}
+
+#buttons Button {
+    width: 1fr;
+}
+
+#back {
+    margin-right: 1;
+}
+
 Button.-primary {
     background: #5b8cff;
     color: #0e0f13;
