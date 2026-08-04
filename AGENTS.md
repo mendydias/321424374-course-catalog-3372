@@ -14,7 +14,8 @@
 
 Work proceeds in three phases, with artifacts stored per feature under
 `.plans/<feature>/` at the repo root (gitignored, so plans never enter version
-control):
+control). Directory names follow the format `Date-feature-short-summary`
+(e.g. `2026-08-04-ac2.4-retrieval`):
 
 1. **Research** — explore the codebase and write findings to
    `.plans/<feature>/research.md`. Output exact line numbers, filenames, and
