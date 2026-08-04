@@ -1,6 +1,7 @@
 import pytest
 
 from controllers import CourseError, create_course, register_course
+from data import course_exists, get_course
 from models import Course, Department
 
 
@@ -113,6 +114,7 @@ class TestRegisterCourse:
     def test_valid(self) -> None:
         course = self._make_course("EEI3372", "digital systems", 1, "john smith")
         register_course(course)
+        assert get_course("EEI3372") == course
         assert course.code == "EEI3372"
         assert course.name == "Digital systems"
         assert course.semester == 1
@@ -163,6 +165,7 @@ class TestRegisterCourse:
         course = self._make_course("EEI3372", name, semester, lecturer)
         with pytest.raises(CourseError, match=match):
             register_course(course)
+        assert not course_exists("EEI3372")
 
     def test_duplicate_code_raises_error(self) -> None:
         course1 = self._make_course("EEI1372", "Digital Systems", 2, "Jane Doe")
