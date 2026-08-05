@@ -9,6 +9,7 @@ from views import HomeView
 class CourseApp(App):
     TITLE = "ECE Course Catalog Manager"
     ENABLE_COMMAND_PALETTE = False
+    CSS_PATH = "views/app.tcss"
 
     def __init__(self) -> None:
         super().__init__()

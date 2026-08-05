@@ -71,3 +71,29 @@ control). Directory names follow the format `Date-feature-short-summary`
 - Tests are expected to include Hypothesis property-based tests
   (`tests/test_fuzz.py`). This is a pending requirement — not yet implemented.
 - Devcontainer shell is fish, user `dev`; commits use Conventional Commits (see `git log`).
+
+## UI design system
+
+- Palette tokens (single source of truth in `views/app.tcss`):
+  - screen bg: `#14161c`
+  - chrome bg: `#0e0f13`
+  - card bg: `#1c1f28`
+  - input bg: `#22252f` (focus `#262a35`)
+  - border: `#363c4c`
+  - text: `#e6e6ea`
+  - muted: `#b9bfcc`
+  - accent: `#5b8cff`, hover `#7aa2ff`
+  - on-accent: `#0e0f13`
+  - error: `#ff5c5c`
+- Shared styles live in `views/app.tcss`; screen `.tcss` files hold only
+  screen-specific rules.
+- Every interactive widget must declare explicit `background` + `color` for
+  default/hover/focus; never rely on Textual theme defaults.
+- Button convention: default buttons use `#343a4a` bg / `#e6e6ea` text;
+  `-primary` buttons use accent bg + on-accent text.
+- DataTable baseline: header `#0e0f13`, zebra rows (`#22252f` odd / `#1c1f28`
+  even), hover `#343a4a`, cursor accent bg (`#5b8cff`) + on-accent text + bold.
+- Table containers use `width: 1fr` (no max-width cap) and the table itself
+  uses `width: 100%; height: auto`.
+- Error-label convention: `id="error"`, hidden by default, shown via
+  `.-visible` toggle.

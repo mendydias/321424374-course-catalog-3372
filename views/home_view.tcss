@@ -1,51 +1,7 @@
-Screen {
-    background: #14161c;
-    color: #e6e6ea;
-    align: center middle;
-}
-
 #menu {
     width: 60;
     padding: 2 4;
     background: #1c1f28;
-    border: round #2e3340;
+    border: round #363c4c;
     border-title-color: #e6e6ea;
-}
-
-Button {
-    margin: 1 0 0 0;
-    width: 100%;
-    text-style: bold;
-}
-
-Button.-primary {
-    background: #5b8cff;
-    color: #0e0f13;
-    border: none;
-}
-
-Button.-primary:hover {
-    background: #7aa2ff;
-}
-
-Button.-primary:focus {
-    text-style: bold underline;
-}
-
-/* --- Header ----------------------------------------------------------- */
-
-Header {
-    background: #0e0f13;
-    color: #e6e6ea;
-}
-
-/* --- Footer ----------------------------------------------------------- */
-
-Footer {
-    background: #0e0f13;
-    color: #e6e6ea;
-}
-
-Footer > .footer--key {
-    color: #5b8cff;
 }

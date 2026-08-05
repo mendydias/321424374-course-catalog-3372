@@ -1,34 +1,18 @@
-Screen {
-    background: #14161c;
-    color: #e6e6ea;
-    align: center middle;
-}
-
 #table-card {
-    width: 90%;
-    max-width: 110;
+    width: 1fr;
     padding: 1 2;
     background: #1c1f28;
-    border: round #2e3340;
+    border: round #363c4c;
+    height: auto;
+}
+
+#courses-table {
+    width: 100%;
     height: auto;
 }
 
 #empty {
     content-align: center middle;
-    color: #a0a4b0;
+    color: #b9bfcc;
     text-style: bold;
-}
-
-Header {
-    background: #0e0f13;
-    color: #e6e6ea;
-}
-
-Footer {
-    background: #0e0f13;
-    color: #e6e6ea;
-}
-
-Footer > .footer--key {
-    color: #5b8cff;
 }
