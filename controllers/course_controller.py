@@ -1,6 +1,12 @@
 import re
 
-from data import CourseRepoError, add_course, get_department, list_departments
+from data import (
+    CourseRepoError,
+    add_course,
+    get_department,
+    list_courses as _repo_list_courses,
+    list_departments,
+)
 from models import Course
 
 CODE_PATTERN = re.compile(r"[A-Za-z]{3}\d{4}")
@@ -82,3 +88,7 @@ def register_course(course: Course) -> Course:
     except CourseRepoError as e:
         raise CourseError(str(e)) from e
     return course
+
+
+def list_courses() -> dict[str, Course]:
+    return _repo_list_courses()

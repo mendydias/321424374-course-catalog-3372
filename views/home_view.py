@@ -9,6 +9,7 @@ from textual.widgets import Button, Footer, Header
 
 from models import Course
 
+from views.course_list_view import CourseListView
 from views.create_course_department_view import CreateCourseDepartmentView
 
 
@@ -36,3 +37,7 @@ class HomeView(Screen):
     def _add_course(self) -> None:
         self._on_add()
         self.app.push_screen(CreateCourseDepartmentView(self._on_submit))
+
+    @on(Button.Pressed, "#view-courses")
+    def _view_courses(self) -> None:
+        self.app.push_screen(CourseListView())

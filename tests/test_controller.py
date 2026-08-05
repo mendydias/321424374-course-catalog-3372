@@ -1,6 +1,6 @@
 import pytest
 
-from controllers import CourseError, create_course, register_course
+from controllers import CourseError, create_course, list_courses, register_course
 from data import course_exists, get_course
 from models import Course, Department
 
@@ -173,3 +173,30 @@ class TestRegisterCourse:
         course2 = self._make_course("EEI1372", "Digital Systems", 2, "Jane Doe")
         with pytest.raises(CourseError, match="already exists"):
             register_course(course2)
+
+
+class TestListCourses:
+    def test_list_courses_empty(self) -> None:
+        assert list_courses() == {}
+
+    def test_list_courses_returns_all(self) -> None:
+        course = create_course("EEI3372")
+        course.name = "Digital Systems"
+        course.semester = 2
+        course.lecturer = "John Smith"
+        register_course(course)
+
+        result = list_courses()
+        assert len(result) == 1
+        assert "EEI3372" in result
+        assert result["EEI3372"] == course
+
+    def test_list_courses_returns_copy(self) -> None:
+        course = create_course("EEI3372")
+        course.name = "Digital Systems"
+        course.semester = 2
+        course.lecturer = "John Smith"
+        register_course(course)
+
+        list_courses().clear()
+        assert len(list_courses()) == 1

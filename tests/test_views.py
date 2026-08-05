@@ -1,6 +1,8 @@
 import pytest
+from textual.widgets import DataTable, Label
 
 from data import course_exists
+from views import CourseListView, HomeView
 
 
 class TestHomeView:
@@ -135,3 +137,98 @@ class TestCreateCourseNameLecturerSemesterView:
         await screen2_pilot.press("escape")
         await screen2_pilot.pause()
         assert type(screen2_pilot.app.screen).__name__ == "CreateCourseDepartmentView"
+
+
+class TestCourseListView:
+    @pytest.mark.asyncio
+    async def test_empty_repo_shows_empty_label(self, pilot):
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseListView)
+        label = pilot.app.screen.query_one("#empty", Label)
+        assert str(label.content) == "Courses table is empty."
+
+    @pytest.mark.asyncio
+    async def test_empty_repo_has_no_table(self, pilot):
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        assert len(list(pilot.app.screen.query(DataTable))) == 0
+
+    @pytest.mark.asyncio
+    async def test_seeded_repo_shows_table_not_label(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseListView)
+        pilot.app.screen.query_one("#courses-table", DataTable)
+        assert len(list(pilot.app.screen.query("#empty"))) == 0
+
+    @pytest.mark.asyncio
+    async def test_table_cursor_type_is_row(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.cursor_type == "row"
+
+    @pytest.mark.asyncio
+    async def test_table_zebra_stripes_enabled(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.zebra_stripes is True
+
+    @pytest.mark.asyncio
+    async def test_table_columns(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert [str(c.label) for c in table.ordered_columns] == [
+            "Code", "Name", "Department", "Level", "Credits", "Semester", "Lecturer"
+        ]
+
+    @pytest.mark.asyncio
+    async def test_table_rows_keyed_by_code(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert {rk.value for rk in table.rows} == {"EEI3372", "EEI2262"}
+        assert table.row_count == 2
+
+    @pytest.mark.asyncio
+    async def test_table_row_content(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.get_row("EEI3372") == [
+            "EEI3372", "Digital systems", "Electrical and Computer Engineering", 3, 3, 2, "John Smith"
+        ]
+
+    @pytest.mark.asyncio
+    async def test_escape_returns_to_home(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.press("escape")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, HomeView)
+
+    @pytest.mark.asyncio
+    async def test_courses_added_via_add_flow_appear(self, screen2_pilot):
+        pilot = screen2_pilot
+        await pilot.press(*"Digital Systems")
+        await pilot.press("tab")
+        await pilot.press(*"John Smith")
+        await pilot.press("tab")
+        await pilot.press(*"2")
+        await pilot.press("enter")
+        await pilot.pause()
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 1
+        assert "EEI3372" in {rk.value for rk in table.rows}
