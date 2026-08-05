@@ -1,8 +1,9 @@
 import pytest
-from textual.widgets import DataTable, Label
+from textual.widgets import DataTable, Input, Label
 
-from data import course_exists
-from views import CourseListView, HomeView
+from data import course_exists, get_department
+from models import Course
+from views import CourseListView, HomeView, filter_courses
 
 
 class TestHomeView:
@@ -232,3 +233,98 @@ class TestCourseListView:
         table = pilot.app.screen.query_one("#courses-table", DataTable)
         assert table.row_count == 1
         assert "EEI3372" in {rk.value for rk in table.rows}
+
+
+class TestFilterCourses:
+    @staticmethod
+    def _seed() -> dict[str, Course]:
+        dept = get_department("EE")
+        assert dept is not None
+        return {
+            "EEI3372": Course(code="EEI3372", department=dept, level=3, credits=3,
+                              name="Digital systems", semester=2, lecturer="John Smith"),
+            "EEI2262": Course(code="EEI2262", department=dept, level=2, credits=2,
+                              name="Circuit theory", semester=1, lecturer="Jane Doe"),
+        }
+
+    def test_empty_key_returns_full_dict_unchanged(self):
+        courses = self._seed()
+        assert filter_courses(courses, "") is courses
+
+    def test_code_substring_matches_both(self):
+        assert set(filter_courses(self._seed(), "EEI")) == {"EEI3372", "EEI2262"}
+
+    def test_numeric_substring_matches_one(self):
+        assert set(filter_courses(self._seed(), "3372")) == {"EEI3372"}
+
+    def test_filter_is_case_insensitive(self):
+        assert set(filter_courses(self._seed(), "eei2262")) == {"EEI2262"}
+
+    def test_no_match_returns_empty_dict(self):
+        assert filter_courses(self._seed(), "XYZ") == {}
+
+
+class TestCourseListViewSearch:
+    @pytest.mark.asyncio
+    async def test_search_input_shown_when_seeded(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        pilot.app.screen.query_one("#search", Input)
+
+    @pytest.mark.asyncio
+    async def test_search_input_hidden_when_empty(self, pilot):
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        assert list(pilot.app.screen.query("#search")) == []
+
+    @pytest.mark.asyncio
+    async def test_typing_filters_rows(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#search")
+        await pilot.press(*"3372")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 1
+        assert {rk.value for rk in table.rows} == {"EEI3372"}
+
+    @pytest.mark.asyncio
+    async def test_filter_case_insensitive(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#search")
+        await pilot.press(*"eei2262")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 1
+        assert {rk.value for rk in table.rows} == {"EEI2262"}
+
+    @pytest.mark.asyncio
+    async def test_no_match_shows_zero_rows(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#search")
+        await pilot.press(*"XYZ")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 0
+        assert len(table.ordered_columns) == 7
+
+    @pytest.mark.asyncio
+    async def test_clearing_input_restores_rows(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#search")
+        await pilot.press(*"3372")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 1
+        search = pilot.app.screen.query_one("#search", Input)
+        search.value = ""
+        await pilot.pause()
+        assert table.row_count == 2

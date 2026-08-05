@@ -11,6 +11,11 @@
     height: auto;
 }
 
+#search {
+    margin: 1;
+    width: 100;
+}
+
 #empty {
     content-align: center middle;
     color: #b9bfcc;

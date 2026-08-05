@@ -1,12 +1,21 @@
+from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import Screen
-from textual.widgets import DataTable, Footer, Header, Label
+from textual.widgets import DataTable, Footer, Header, Label, Input
 
 from controllers import list_courses
+from models import Course
 
 COLUMNS = ("Code", "Name", "Department", "Level", "Credits", "Semester", "Lecturer")
+
+
+def filter_courses(courses: dict[str, Course], key: str) -> dict[str, Course]:
+    if not key:
+        return courses
+    needle = key.casefold()
+    return {code: c for code, c in courses.items() if needle in code.casefold()}
 
 
 class CourseListView(Screen):
@@ -21,6 +30,7 @@ class CourseListView(Screen):
         yield Header()
         with Vertical(id="table-card"):
             if self._courses:
+                yield Input(id="search", placeholder="Search")
                 yield DataTable(id="courses-table", cursor_type="row", zebra_stripes=True)
             else:
                 yield Label("Courses table is empty.", id="empty")
@@ -31,7 +41,14 @@ class CourseListView(Screen):
             return
         table = self.query_one("#courses-table", DataTable)
         table.add_columns(*COLUMNS)
-        for code, course in self._courses.items():
+        self.populate_table(self._courses.items())
+
+    def populate_table(self, rows) -> None:
+        table = self.query_one("#courses-table", DataTable)
+        table.clear()
+        if isinstance(rows, dict):
+            rows = rows.items()
+        for code, course in rows:
             table.add_row(
                 course.code,
                 course.name,
@@ -42,3 +59,7 @@ class CourseListView(Screen):
                 course.lecturer,
                 key=code,
             )
+
+    @on(Input.Changed, "#search")
+    def on_input_changed(self, event: Input.Changed) -> None:
+        self.populate_table(filter_courses(self._courses, event.value))

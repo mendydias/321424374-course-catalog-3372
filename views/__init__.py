@@ -1,4 +1,4 @@
-from views.course_list_view import CourseListView
+from views.course_list_view import CourseListView, filter_courses
 from views.create_course_department_view import CreateCourseDepartmentView
 from views.create_course_name_lecturer_semester_view import (
     CreateCourseNameLecturerSemesterView,
@@ -10,4 +10,5 @@ __all__ = [
     "CreateCourseDepartmentView",
     "CreateCourseNameLecturerSemesterView",
     "HomeView",
+    "filter_courses",
 ]
