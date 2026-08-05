@@ -1,5 +1,5 @@
 from textual import on
-from textual.app import App, ComposeResult
+from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import Screen
@@ -10,7 +10,7 @@ from controllers import CourseDTO, list_courses
 COLUMNS = ("Code", "Name", "Department", "Level", "Credits", "Semester", "Lecturer")
 
 
-def filter_courses(courses: dict[str, CourseDTO], key: str, app: App) -> dict[str, CourseDTO]:
+def filter_courses(courses: dict[str, CourseDTO], key: str) -> dict[str, CourseDTO]:
     if not key:
         return courses
     needle = key.casefold()
@@ -18,18 +18,13 @@ def filter_courses(courses: dict[str, CourseDTO], key: str, app: App) -> dict[st
     if ":" in needle:
         feature, needle = needle.split(":", 1)
     rows = {}
-    needle_not_found = True
     for code, course in courses.items():
         if not feature and needle in code.casefold():
             rows[code] = course
-            needle_not_found = False
         elif feature:
             property_value = getattr(course, feature, None)
             if property_value and needle in property_value.casefold():
                 rows[code] = course
-                needle_not_found = False
-    if needle_not_found:
-        app.notify(f"Course code {needle} doesn't exist.")
     return rows
 
 
@@ -77,4 +72,4 @@ class CourseListView(Screen):
 
     @on(Input.Changed, "#search")
     def on_input_changed(self, event: Input.Changed) -> None:
-        self.populate_table(filter_courses(self._courses, event.value, self.app))
+        self.populate_table(filter_courses(self._courses, event.value))
