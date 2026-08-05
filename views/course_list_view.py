@@ -1,5 +1,5 @@
 from textual import on
-from textual.app import ComposeResult
+from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import Screen
@@ -11,11 +11,19 @@ from models import Course
 COLUMNS = ("Code", "Name", "Department", "Level", "Credits", "Semester", "Lecturer")
 
 
-def filter_courses(courses: dict[str, Course], key: str) -> dict[str, Course]:
+def filter_courses(courses: dict[str, Course], key: str, app: App) -> dict[str, Course]:
     if not key:
         return courses
     needle = key.casefold()
-    return {code: c for code, c in courses.items() if needle in code.casefold()}
+    rows = {}
+    needle_not_found = True
+    for code, c in courses.items():
+        if needle in code.casefold():
+            rows[code] = c
+            needle_not_found = False
+    if needle_not_found:
+        app.notify(f"Course code {needle} doesn't exist.")
+    return rows
 
 
 class CourseListView(Screen):
@@ -62,4 +70,4 @@ class CourseListView(Screen):
 
     @on(Input.Changed, "#search")
     def on_input_changed(self, event: Input.Changed) -> None:
-        self.populate_table(filter_courses(self._courses, event.value))
+        self.populate_table(filter_courses(self._courses, event.value, self.app))

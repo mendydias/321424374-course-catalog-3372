@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 from textual.widgets import DataTable, Input, Label
 
@@ -249,19 +251,44 @@ class TestFilterCourses:
 
     def test_empty_key_returns_full_dict_unchanged(self):
         courses = self._seed()
-        assert filter_courses(courses, "") is courses
+        app = Mock()
+        assert filter_courses(courses, "", app) is courses
+        app.notify.assert_not_called()
 
     def test_code_substring_matches_both(self):
-        assert set(filter_courses(self._seed(), "EEI")) == {"EEI3372", "EEI2262"}
+        app = Mock()
+        assert set(filter_courses(self._seed(), "EEI", app)) == {"EEI3372", "EEI2262"}
+        app.notify.assert_not_called()
 
     def test_numeric_substring_matches_one(self):
-        assert set(filter_courses(self._seed(), "3372")) == {"EEI3372"}
+        app = Mock()
+        assert set(filter_courses(self._seed(), "3372", app)) == {"EEI3372"}
+        app.notify.assert_not_called()
 
     def test_filter_is_case_insensitive(self):
-        assert set(filter_courses(self._seed(), "eei2262")) == {"EEI2262"}
+        app = Mock()
+        assert set(filter_courses(self._seed(), "eei2262", app)) == {"EEI2262"}
+        app.notify.assert_not_called()
 
     def test_no_match_returns_empty_dict(self):
-        assert filter_courses(self._seed(), "XYZ") == {}
+        app = Mock()
+        assert filter_courses(self._seed(), "XYZ", app) == {}
+        app.notify.assert_called_once_with("Course code xyz doesn't exist.")
+
+    def test_no_match_notifies_once(self):
+        app = Mock()
+        filter_courses(self._seed(), "XYZ", app)
+        app.notify.assert_called_once()
+
+    def test_match_does_not_notify(self):
+        app = Mock()
+        filter_courses(self._seed(), "3372", app)
+        app.notify.assert_not_called()
+
+    def test_notify_message_uses_casefolded_key(self):
+        app = Mock()
+        filter_courses(self._seed(), "XyZ", app)
+        app.notify.assert_called_once_with("Course code xyz doesn't exist.")
 
 
 class TestCourseListViewSearch:
