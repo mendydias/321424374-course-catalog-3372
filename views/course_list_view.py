@@ -5,22 +5,29 @@ from textual.containers import Vertical
 from textual.screen import Screen
 from textual.widgets import DataTable, Footer, Header, Label, Input
 
-from controllers import list_courses
-from models import Course
+from controllers import CourseDTO, list_courses
 
 COLUMNS = ("Code", "Name", "Department", "Level", "Credits", "Semester", "Lecturer")
 
 
-def filter_courses(courses: dict[str, Course], key: str, app: App) -> dict[str, Course]:
+def filter_courses(courses: dict[str, CourseDTO], key: str, app: App) -> dict[str, CourseDTO]:
     if not key:
         return courses
     needle = key.casefold()
+    feature = None
+    if ":" in needle:
+        feature, needle = needle.split(":", 1)
     rows = {}
     needle_not_found = True
-    for code, c in courses.items():
-        if needle in code.casefold():
-            rows[code] = c
+    for code, course in courses.items():
+        if not feature and needle in code.casefold():
+            rows[code] = course
             needle_not_found = False
+        elif feature:
+            property_value = getattr(course, feature, None)
+            if property_value and needle in property_value.casefold():
+                rows[code] = course
+                needle_not_found = False
     if needle_not_found:
         app.notify(f"Course code {needle} doesn't exist.")
     return rows
@@ -60,7 +67,7 @@ class CourseListView(Screen):
             table.add_row(
                 course.code,
                 course.name,
-                course.department.name,
+                course.department,
                 course.level,
                 course.credits,
                 course.semester,

@@ -3,8 +3,8 @@ from unittest.mock import Mock
 import pytest
 from textual.widgets import DataTable, Input, Label
 
-from data import course_exists, get_department
-from models import Course
+from controllers import CourseDTO
+from data import course_exists
 from views import CourseListView, HomeView, filter_courses
 
 
@@ -208,7 +208,7 @@ class TestCourseListView:
         await pilot.pause()
         table = pilot.app.screen.query_one("#courses-table", DataTable)
         assert table.get_row("EEI3372") == [
-            "EEI3372", "Digital systems", "Electrical and Computer Engineering", 3, 3, 2, "John Smith"
+            "EEI3372", "Digital systems", "Electrical and Computer Engineering", "3", "3", "2", "John Smith"
         ]
 
     @pytest.mark.asyncio
@@ -239,14 +239,14 @@ class TestCourseListView:
 
 class TestFilterCourses:
     @staticmethod
-    def _seed() -> dict[str, Course]:
-        dept = get_department("EE")
-        assert dept is not None
+    def _seed() -> dict[str, CourseDTO]:
         return {
-            "EEI3372": Course(code="EEI3372", department=dept, level=3, credits=3,
-                              name="Digital systems", semester=2, lecturer="John Smith"),
-            "EEI2262": Course(code="EEI2262", department=dept, level=2, credits=2,
-                              name="Circuit theory", semester=1, lecturer="Jane Doe"),
+            "EEI3372": CourseDTO(code="EEI3372", department="Electrical and Computer Engineering",
+                                 level="3", credits="3",
+                                 name="Digital systems", semester="2", lecturer="John Smith"),
+            "EEI2262": CourseDTO(code="EEI2262", department="Electrical and Computer Engineering",
+                                 level="2", credits="2",
+                                 name="Circuit theory", semester="1", lecturer="Jane Doe"),
         }
 
     def test_empty_key_returns_full_dict_unchanged(self):
@@ -270,10 +270,11 @@ class TestFilterCourses:
         assert set(filter_courses(self._seed(), "eei2262", app)) == {"EEI2262"}
         app.notify.assert_not_called()
 
+    @pytest.mark.xfail(strict=True, reason="notify message not yet 'No course matches {field}={needle}.'")
     def test_no_match_returns_empty_dict(self):
         app = Mock()
         assert filter_courses(self._seed(), "XYZ", app) == {}
-        app.notify.assert_called_once_with("Course code xyz doesn't exist.")
+        app.notify.assert_called_once_with("No course matches code=xyz.")
 
     def test_no_match_notifies_once(self):
         app = Mock()
@@ -285,10 +286,72 @@ class TestFilterCourses:
         filter_courses(self._seed(), "3372", app)
         app.notify.assert_not_called()
 
+    @pytest.mark.xfail(strict=True, reason="notify message not yet 'No course matches {field}={needle}.'")
     def test_notify_message_uses_casefolded_key(self):
         app = Mock()
         filter_courses(self._seed(), "XyZ", app)
-        app.notify.assert_called_once_with("Course code xyz doesn't exist.")
+        app.notify.assert_called_once_with("No course matches code=xyz.")
+
+    def test_field_value_matches_by_field(self):
+        app = Mock()
+        assert set(filter_courses(self._seed(), "name:circuit", app)) == {"EEI2262"}
+        app.notify.assert_not_called()
+
+    def test_field_search_is_case_insensitive(self):
+        app = Mock()
+        assert set(filter_courses(self._seed(), "Name:CIRCUIT", app)) == {"EEI2262"}
+        app.notify.assert_not_called()
+
+    def test_numeric_field_matches_via_str_coercion(self):
+        app = Mock()
+        assert set(filter_courses(self._seed(), "level:3", app)) == {"EEI3372"}
+        assert set(filter_courses(self._seed(), "semester:1", app)) == {"EEI2262"}
+        app.notify.assert_not_called()
+
+    def test_code_field_matches(self):
+        app = Mock()
+        assert set(filter_courses(self._seed(), "code:2262", app)) == {"EEI2262"}
+        app.notify.assert_not_called()
+
+    def test_field_mode_does_not_fall_back_to_code(self):
+        app = Mock()
+        assert filter_courses(self._seed(), "name:eei", app) == {}
+        app.notify.assert_called_once()
+
+    def test_value_with_colon_does_not_raise(self):
+        app = Mock()
+        assert filter_courses(self._seed(), "name:a:b", app) == {}
+        app.notify.assert_called_once()
+
+    def test_unknown_field_returns_empty_and_notifies(self):
+        app = Mock()
+        assert filter_courses(self._seed(), "bogus:x", app) == {}
+        app.notify.assert_called_once()
+
+    def test_empty_value_after_colon_matches_all(self):
+        app = Mock()
+        assert set(filter_courses(self._seed(), "name:", app)) == {"EEI3372", "EEI2262"}
+        app.notify.assert_not_called()
+
+    def test_department_name_matches(self):
+        app = Mock()
+        assert set(filter_courses(self._seed(), "department:electrical", app)) == {
+            "EEI3372",
+            "EEI2262",
+        }
+        app.notify.assert_not_called()
+
+    @pytest.mark.xfail(strict=True, reason="notify message not yet 'No course matches {field}={needle}.'")
+    def test_default_no_match_message(self):
+        app = Mock()
+        filter_courses(self._seed(), "xyz", app)
+        app.notify.assert_called_once_with("No course matches code=xyz.")
+
+    @pytest.mark.xfail(strict=True, reason="notify message not yet 'No course matches {field}={needle}.'")
+    def test_field_no_match_message(self):
+        app = Mock()
+        filter_courses(self._seed(), "name:xyz", app)
+        app.notify.assert_called_once_with("No course matches name=xyz.")
 
 
 class TestCourseListViewSearch:
@@ -355,3 +418,50 @@ class TestCourseListViewSearch:
         search.value = ""
         await pilot.pause()
         assert table.row_count == 2
+
+    @pytest.mark.asyncio
+    async def test_typing_field_value_filters_rows(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#search")
+        await pilot.press(*"name:circuit")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 1
+        assert {rk.value for rk in table.rows} == {"EEI2262"}
+
+    @pytest.mark.asyncio
+    async def test_numeric_field_search_filters_rows(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#search")
+        await pilot.press(*"level:2")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 1
+        assert {rk.value for rk in table.rows} == {"EEI2262"}
+
+    @pytest.mark.asyncio
+    async def test_unknown_field_shows_zero_rows(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#search")
+        await pilot.press(*"bogus:x")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 0
+        assert len(table.ordered_columns) == 7
+
+    @pytest.mark.asyncio
+    async def test_colon_in_value_does_not_crash(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#search")
+        await pilot.press(*"name:a:b")
+        await pilot.pause()
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.row_count == 0

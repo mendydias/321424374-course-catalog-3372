@@ -1,5 +1,6 @@
 import re
 
+from controllers.course_dto import CourseDTO
 from data import (
     CourseRepoError,
     add_course,
@@ -90,5 +91,5 @@ def register_course(course: Course) -> Course:
     return course
 
 
-def list_courses() -> dict[str, Course]:
-    return _repo_list_courses()
+def list_courses() -> dict[str, CourseDTO]:
+    return {code: CourseDTO.from_course(c) for code, c in _repo_list_courses().items()}

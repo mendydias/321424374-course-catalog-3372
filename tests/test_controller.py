@@ -1,6 +1,6 @@
 import pytest
 
-from controllers import CourseError, create_course, list_courses, register_course
+from controllers import CourseDTO, CourseError, create_course, list_courses, register_course
 from data import course_exists, get_course
 from models import Course, Department
 
@@ -189,7 +189,7 @@ class TestListCourses:
         result = list_courses()
         assert len(result) == 1
         assert "EEI3372" in result
-        assert result["EEI3372"] == course
+        assert result["EEI3372"] == CourseDTO.from_course(course)
 
     def test_list_courses_returns_copy(self) -> None:
         course = create_course("EEI3372")
