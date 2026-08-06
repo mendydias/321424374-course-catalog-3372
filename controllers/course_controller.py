@@ -5,6 +5,7 @@ from data import (
     CourseRepoError,
     add_course,
     course_exists,
+    get_course as _repo_get_course,
     get_department,
     list_courses as _repo_list_courses,
     list_departments,
@@ -100,6 +101,13 @@ def update_course(course: Course) -> Course:
         _repo_update_course(course)
     except CourseRepoError as e:
         raise CourseError(str(e)) from e
+    return course
+
+
+def get_course(code: str) -> Course:
+    course = _repo_get_course(code)
+    if course is None:
+        raise CourseError(f"Course with code '{code}' not found.")
     return course
 
 

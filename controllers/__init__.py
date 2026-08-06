@@ -1,6 +1,7 @@
 from controllers.course_controller import (
     CourseError,
     create_course,
+    get_course,
     list_courses,
     register_course,
     update_course,
@@ -11,6 +12,7 @@ __all__ = [
     "CourseDTO",
     "CourseError",
     "create_course",
+    "get_course",
     "list_courses",
     "register_course",
     "update_course",

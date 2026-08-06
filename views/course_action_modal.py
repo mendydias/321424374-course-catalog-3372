@@ -5,6 +5,8 @@ from textual.containers import Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button
 
+from views.update_course_view import UpdateCourseView
+
 
 class CourseActionModal(ModalScreen):
     CSS_PATH = "course_action_modal.tcss"
@@ -21,6 +23,9 @@ class CourseActionModal(ModalScreen):
             yield Button("Cancel", id="cancel")
 
     @on(Button.Pressed, "#update")
+    def _update(self) -> None:
+        self.app.push_screen(UpdateCourseView(self._course_code))
+
     @on(Button.Pressed, "#delete")
     @on(Button.Pressed, "#cancel")
     def _close(self) -> None:

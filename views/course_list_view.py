@@ -79,3 +79,12 @@ class CourseListView(Screen):
     def handle_row_selected(self, event: DataTable.RowSelected) -> None:
         row = event.data_table.get_row(event.row_key)
         self.app.push_screen(CourseActionModal(row[0]))
+
+    def on_screen_resume(self) -> None:
+        if not self.query("#courses-table"):
+            return
+        table = self.query_one("#courses-table", DataTable)
+        if not table.columns:
+            return
+        self._courses = list_courses()
+        self.populate_table(filter_courses(self._courses, self.query_one("#search", Input).value))

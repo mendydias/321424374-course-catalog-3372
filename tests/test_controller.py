@@ -1,6 +1,14 @@
 import pytest
 
-from controllers import CourseDTO, CourseError, create_course, list_courses, register_course, update_course
+from controllers import (
+    CourseDTO,
+    CourseError,
+    create_course,
+    get_course as controller_get_course,
+    list_courses,
+    register_course,
+    update_course,
+)
 from data import course_exists, get_course
 from models import Course, Department
 
@@ -257,6 +265,20 @@ class TestUpdateCourse:
         stored = get_course("EEI3372")
         assert stored is not None
         assert stored == original
+
+
+class TestGetCourse:
+    def test_get_course_returns_registered_course(self) -> None:
+        course = create_course("EEI3372")
+        course.name = "Digital systems"
+        course.semester = 2
+        course.lecturer = "John Smith"
+        register_course(course)
+        assert controller_get_course("EEI3372") == course
+
+    def test_get_course_nonexistent_raises(self) -> None:
+        with pytest.raises(CourseError, match="not found"):
+            controller_get_course("EEI3372")
 
 
 class TestListCourses:

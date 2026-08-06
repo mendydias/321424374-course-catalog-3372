@@ -5,6 +5,7 @@ from views.create_course_name_lecturer_semester_view import (
     CreateCourseNameLecturerSemesterView,
 )
 from views.home_view import HomeView
+from views.update_course_view import UpdateCourseView
 
 __all__ = [
     "CourseActionModal",
@@ -12,5 +13,6 @@ __all__ = [
     "CreateCourseDepartmentView",
     "CreateCourseNameLecturerSemesterView",
     "HomeView",
+    "UpdateCourseView",
     "filter_courses",
 ]

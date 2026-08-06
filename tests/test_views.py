@@ -2,8 +2,8 @@ import pytest
 from textual.widgets import Button, DataTable, Input, Label
 
 from controllers import CourseDTO
-from data import course_exists
-from views import CourseActionModal, CourseListView, HomeView, filter_courses
+from data import course_exists, get_course
+from views import CourseActionModal, CourseListView, HomeView, UpdateCourseView, filter_courses
 
 
 class TestHomeView:
@@ -444,3 +444,68 @@ class TestCourseActionModal:
         await pilot.press("escape")
         await pilot.pause()
         assert isinstance(pilot.app.screen, CourseListView)
+
+
+class TestUpdateCourseView:
+    @staticmethod
+    async def _open_form(pilot) -> None:
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#courses-table")
+        await pilot.press("enter")
+        await pilot.pause()
+        await pilot.click("#update")
+        await pilot.pause()
+
+    @pytest.mark.asyncio
+    async def test_update_form_shows_current_values(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_form(pilot)
+        assert isinstance(pilot.app.screen, UpdateCourseView)
+        assert pilot.app.screen.query_one("#name", Input).value == "Digital systems"
+        assert pilot.app.screen.query_one("#lecturer", Input).value == "John Smith"
+        assert pilot.app.screen.query_one("#semester", Input).value == "2"
+
+    @pytest.mark.asyncio
+    async def test_submit_updates_course_and_returns_to_list(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_form(pilot)
+        pilot.app.screen.query_one("#lecturer", Input).value = "Alice Ray"
+        await pilot.pause()
+        await pilot.click("#submit")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseListView)
+        stored = get_course("EEI3372")
+        assert stored is not None
+        assert stored.lecturer == "Alice Ray"
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert table.get_row("EEI3372")[6] == "Alice Ray"
+
+    @pytest.mark.asyncio
+    async def test_invalid_submit_shows_error_and_keeps_course(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_form(pilot)
+        pilot.app.screen.query_one("#name", Input).value = ""
+        await pilot.pause()
+        await pilot.click("#submit")
+        await pilot.pause()
+        error = pilot.app.screen.query_one("#error", Label)
+        assert "-visible" in error.classes
+        stored = get_course("EEI3372")
+        assert stored is not None
+        assert stored.name == "Digital systems"
+
+    @pytest.mark.asyncio
+    async def test_reset_restores_original_values(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_form(pilot)
+        pilot.app.screen.query_one("#name", Input).value = "Changed name"
+        pilot.app.screen.query_one("#lecturer", Input).value = "Someone Else"
+        pilot.app.screen.query_one("#semester", Input).value = "5"
+        await pilot.pause()
+        await pilot.click("#reset")
+        await pilot.pause()
+        screen = pilot.app.screen
+        assert screen.query_one("#name", Input).value == "Digital systems"
+        assert screen.query_one("#lecturer", Input).value == "John Smith"
+        assert screen.query_one("#semester", Input).value == "2"
