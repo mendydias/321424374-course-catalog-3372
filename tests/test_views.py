@@ -1,9 +1,9 @@
 import pytest
-from textual.widgets import DataTable, Input, Label
+from textual.widgets import Button, DataTable, Input, Label
 
 from controllers import CourseDTO
 from data import course_exists
-from views import CourseListView, HomeView, filter_courses
+from views import CourseActionModal, CourseListView, HomeView, filter_courses
 
 
 class TestHomeView:
@@ -406,3 +406,41 @@ class TestCourseListViewSearch:
         await pilot.pause()
         table = pilot.app.screen.query_one("#courses-table", DataTable)
         assert table.row_count == 0
+
+
+class TestCourseActionModal:
+    @pytest.mark.asyncio
+    async def test_row_selection_opens_modal_with_three_buttons(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#courses-table")
+        await pilot.press("enter")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseActionModal)
+        for button_id in ("update", "delete", "cancel"):
+            pilot.app.screen.query_one(f"#{button_id}", Button)
+
+    @pytest.mark.asyncio
+    async def test_cancel_returns_to_list(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#courses-table")
+        await pilot.press("enter")
+        await pilot.pause()
+        await pilot.click("#cancel")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseListView)
+
+    @pytest.mark.asyncio
+    async def test_escape_closes_modal(self, seeded_pilot):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#courses-table")
+        await pilot.press("enter")
+        await pilot.pause()
+        await pilot.press("escape")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseListView)

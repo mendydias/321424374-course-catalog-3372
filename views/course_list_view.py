@@ -6,6 +6,7 @@ from textual.screen import Screen
 from textual.widgets import DataTable, Footer, Header, Label, Input
 
 from controllers import CourseDTO, list_courses
+from views.course_action_modal import CourseActionModal
 
 COLUMNS = ("Code", "Name", "Department", "Level", "Credits", "Semester", "Lecturer")
 
@@ -73,3 +74,8 @@ class CourseListView(Screen):
     @on(Input.Changed, "#search")
     def on_input_changed(self, event: Input.Changed) -> None:
         self.populate_table(filter_courses(self._courses, event.value))
+
+    @on(DataTable.RowSelected, "#courses-table")
+    def handle_row_selected(self, event: DataTable.RowSelected) -> None:
+        row = event.data_table.get_row(event.row_key)
+        self.app.push_screen(CourseActionModal(row[0]))
