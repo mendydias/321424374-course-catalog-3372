@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import pytest
 from textual.widgets import DataTable, Input, Label
 
@@ -251,107 +249,50 @@ class TestFilterCourses:
 
     def test_empty_key_returns_full_dict_unchanged(self):
         courses = self._seed()
-        app = Mock()
-        assert filter_courses(courses, "", app) is courses
-        app.notify.assert_not_called()
+        assert filter_courses(courses, "") is courses
 
     def test_code_substring_matches_both(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "EEI", app)) == {"EEI3372", "EEI2262"}
-        app.notify.assert_not_called()
+        assert set(filter_courses(self._seed(), "EEI")) == {"EEI3372", "EEI2262"}
 
     def test_numeric_substring_matches_one(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "3372", app)) == {"EEI3372"}
-        app.notify.assert_not_called()
+        assert set(filter_courses(self._seed(), "3372")) == {"EEI3372"}
 
     def test_filter_is_case_insensitive(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "eei2262", app)) == {"EEI2262"}
-        app.notify.assert_not_called()
+        assert set(filter_courses(self._seed(), "eei2262")) == {"EEI2262"}
 
-    @pytest.mark.xfail(strict=True, reason="notify message not yet 'No course matches {field}={needle}.'")
     def test_no_match_returns_empty_dict(self):
-        app = Mock()
-        assert filter_courses(self._seed(), "XYZ", app) == {}
-        app.notify.assert_called_once_with("No course matches code=xyz.")
-
-    def test_no_match_notifies_once(self):
-        app = Mock()
-        filter_courses(self._seed(), "XYZ", app)
-        app.notify.assert_called_once()
-
-    def test_match_does_not_notify(self):
-        app = Mock()
-        filter_courses(self._seed(), "3372", app)
-        app.notify.assert_not_called()
-
-    @pytest.mark.xfail(strict=True, reason="notify message not yet 'No course matches {field}={needle}.'")
-    def test_notify_message_uses_casefolded_key(self):
-        app = Mock()
-        filter_courses(self._seed(), "XyZ", app)
-        app.notify.assert_called_once_with("No course matches code=xyz.")
+        assert filter_courses(self._seed(), "XYZ") == {}
 
     def test_field_value_matches_by_field(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "name:circuit", app)) == {"EEI2262"}
-        app.notify.assert_not_called()
+        assert set(filter_courses(self._seed(), "name:circuit")) == {"EEI2262"}
 
     def test_field_search_is_case_insensitive(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "Name:CIRCUIT", app)) == {"EEI2262"}
-        app.notify.assert_not_called()
+        assert set(filter_courses(self._seed(), "Name:CIRCUIT")) == {"EEI2262"}
 
     def test_numeric_field_matches_via_str_coercion(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "level:3", app)) == {"EEI3372"}
-        assert set(filter_courses(self._seed(), "semester:1", app)) == {"EEI2262"}
-        app.notify.assert_not_called()
+        assert set(filter_courses(self._seed(), "level:3")) == {"EEI3372"}
+        assert set(filter_courses(self._seed(), "semester:1")) == {"EEI2262"}
 
     def test_code_field_matches(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "code:2262", app)) == {"EEI2262"}
-        app.notify.assert_not_called()
+        assert set(filter_courses(self._seed(), "code:2262")) == {"EEI2262"}
 
     def test_field_mode_does_not_fall_back_to_code(self):
-        app = Mock()
-        assert filter_courses(self._seed(), "name:eei", app) == {}
-        app.notify.assert_called_once()
+        assert filter_courses(self._seed(), "name:eei") == {}
 
     def test_value_with_colon_does_not_raise(self):
-        app = Mock()
-        assert filter_courses(self._seed(), "name:a:b", app) == {}
-        app.notify.assert_called_once()
+        assert filter_courses(self._seed(), "name:a:b") == {}
 
-    def test_unknown_field_returns_empty_and_notifies(self):
-        app = Mock()
-        assert filter_courses(self._seed(), "bogus:x", app) == {}
-        app.notify.assert_called_once()
+    def test_unknown_field_returns_empty(self):
+        assert filter_courses(self._seed(), "bogus:x") == {}
 
     def test_empty_value_after_colon_matches_all(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "name:", app)) == {"EEI3372", "EEI2262"}
-        app.notify.assert_not_called()
+        assert set(filter_courses(self._seed(), "name:")) == {"EEI3372", "EEI2262"}
 
     def test_department_name_matches(self):
-        app = Mock()
-        assert set(filter_courses(self._seed(), "department:electrical", app)) == {
+        assert set(filter_courses(self._seed(), "department:electrical")) == {
             "EEI3372",
             "EEI2262",
         }
-        app.notify.assert_not_called()
-
-    @pytest.mark.xfail(strict=True, reason="notify message not yet 'No course matches {field}={needle}.'")
-    def test_default_no_match_message(self):
-        app = Mock()
-        filter_courses(self._seed(), "xyz", app)
-        app.notify.assert_called_once_with("No course matches code=xyz.")
-
-    @pytest.mark.xfail(strict=True, reason="notify message not yet 'No course matches {field}={needle}.'")
-    def test_field_no_match_message(self):
-        app = Mock()
-        filter_courses(self._seed(), "name:xyz", app)
-        app.notify.assert_called_once_with("No course matches name=xyz.")
 
 
 class TestCourseListViewSearch:
