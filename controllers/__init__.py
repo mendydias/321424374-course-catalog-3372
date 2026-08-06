@@ -3,6 +3,7 @@ from controllers.course_controller import (
     create_course,
     list_courses,
     register_course,
+    update_course,
 )
 from controllers.course_dto import CourseDTO
 
@@ -12,4 +13,5 @@ __all__ = [
     "create_course",
     "list_courses",
     "register_course",
+    "update_course",
 ]

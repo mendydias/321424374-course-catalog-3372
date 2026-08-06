@@ -4,9 +4,11 @@ from controllers.course_dto import CourseDTO
 from data import (
     CourseRepoError,
     add_course,
+    course_exists,
     get_department,
     list_courses as _repo_list_courses,
     list_departments,
+    update_course as _repo_update_course,
 )
 from models import Course
 
@@ -52,10 +54,8 @@ def create_course(code: str) -> Course:
     return Course(code=raw, department=department, level=level, credits=credits)
 
 
-def _parse_name_semester_lecturer(
-    course: Course, name: str, semester: int, lecturer: str,
-) -> Course:
-    name = name.strip()
+def validate_course(course: Course) -> Course:
+    name = course.name.strip()
     if not name:
         raise CourseError("Course name cannot be empty.")
     if len(name) <= 3:
@@ -64,13 +64,14 @@ def _parse_name_semester_lecturer(
         )
     course.name = name[0].upper() + name[1:].lower()
 
+    semester = course.semester
     if semester <= 0 or semester >= 9:
         raise CourseError(
             f"Semester must be between 1 and 8, got {semester}."
         )
     course.semester = semester
 
-    lecturer = lecturer.strip()
+    lecturer = course.lecturer.strip()
     if not lecturer:
         raise CourseError("Lecturer name cannot be empty.")
     if len(lecturer) <= 3:
@@ -83,9 +84,20 @@ def _parse_name_semester_lecturer(
 
 
 def register_course(course: Course) -> Course:
-    _parse_name_semester_lecturer(course, course.name, course.semester, course.lecturer)
+    validate_course(course)
     try:
         add_course(course)
+    except CourseRepoError as e:
+        raise CourseError(str(e)) from e
+    return course
+
+
+def update_course(course: Course) -> Course:
+    if not course_exists(course.code):
+        raise CourseError(f"Course with code '{course.code}' not found.")
+    validate_course(course)
+    try:
+        _repo_update_course(course)
     except CourseRepoError as e:
         raise CourseError(str(e)) from e
     return course

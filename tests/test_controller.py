@@ -1,6 +1,6 @@
 import pytest
 
-from controllers import CourseDTO, CourseError, create_course, list_courses, register_course
+from controllers import CourseDTO, CourseError, create_course, list_courses, register_course, update_course
 from data import course_exists, get_course
 from models import Course, Department
 
@@ -173,6 +173,90 @@ class TestRegisterCourse:
         course2 = self._make_course("EEI1372", "Digital Systems", 2, "Jane Doe")
         with pytest.raises(CourseError, match="already exists"):
             register_course(course2)
+
+
+class TestUpdateCourse:
+    @staticmethod
+    def _make_course(code: str, name: str, semester: int, lecturer: str) -> Course:
+        course = create_course(code)
+        course.name = name
+        course.semester = semester
+        course.lecturer = lecturer
+        return course
+
+    def _register_base(self, code: str = "EEI3372") -> Course:
+        course = self._make_course(code, "Digital systems", 2, "John Smith")
+        register_course(course)
+        stored = get_course(code)
+        assert stored is not None
+        return stored
+
+    def test_update_nonexistent_code_rejected(self) -> None:
+        course = self._make_course("EEI3372", "Digital Systems", 1, "John Smith")
+        with pytest.raises(CourseError, match="not found"):
+            update_course(course)
+        assert not course_exists("EEI3372")
+
+    def test_existence_checked_before_field_validation(self) -> None:
+        course = self._make_course("EEI3372", "", 1, "John Smith")
+        with pytest.raises(CourseError, match="not found"):
+            update_course(course)
+
+    def test_update_lecturer_changes_only_that_field(self) -> None:
+        original = self._register_base("EEI3372")
+        updated = self._make_course("EEI3372", "Digital systems", 2, "Jane Doe")
+        update_course(updated)
+        stored = get_course("EEI3372")
+        assert stored is not None
+        assert stored.lecturer == "Jane Doe"
+        assert stored.code == "EEI3372"
+        assert stored.department == original.department
+        assert stored.level == original.level
+        assert stored.credits == original.credits
+        assert stored.name == original.name
+        assert stored.semester == original.semester
+
+    @pytest.mark.parametrize(
+        ("field", "raw", "expected"),
+        [
+            ("name", "CIRCUIT THEORY", "Circuit theory"),
+            ("name", "digital systems", "Digital systems"),
+            ("lecturer", "JANE DOE", "Jane Doe"),
+            ("lecturer", "jane SMITH", "Jane Smith"),
+        ],
+    )
+    def test_update_normalizes_casing(self, field: str, raw: str, expected: str) -> None:
+        self._register_base("EEI3372")
+        updated = self._make_course("EEI3372", "Digital systems", 2, "John Smith")
+        if field == "name":
+            updated.name = raw
+        else:
+            updated.lecturer = raw
+        update_course(updated)
+        stored = get_course("EEI3372")
+        assert stored is not None
+        assert getattr(stored, field) == expected
+
+    @pytest.mark.parametrize(
+        ("name", "semester", "lecturer", "match"),
+        [
+            ("", 1, "John Smith", "cannot be empty"),
+            ("AB", 1, "John Smith", "longer than 3"),
+            ("Digital Systems", 0, "John Smith", "between 1 and 8"),
+            ("Digital Systems", 9, "John Smith", "between 1 and 8"),
+            ("Digital Systems", -1, "John Smith", "between 1 and 8"),
+            ("Digital Systems", 1, "", "cannot be empty"),
+            ("Digital Systems", 1, "AB", "longer than 3"),
+        ],
+    )
+    def test_update_validation_errors(self, name: str, semester: int, lecturer: str, match: str) -> None:
+        original = self._register_base("EEI3372")
+        updated = self._make_course("EEI3372", name, semester, lecturer)
+        with pytest.raises(CourseError, match=match):
+            update_course(updated)
+        stored = get_course("EEI3372")
+        assert stored is not None
+        assert stored == original
 
 
 class TestListCourses:
