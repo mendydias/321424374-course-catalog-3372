@@ -68,8 +68,8 @@ control). Directory names follow the format `Date-feature-short-summary`
 
 - The UI is a Textual TUI (`views/` screens + `.tcss`); use the `.docs/` Textual
   reference when touching it.
-- Tests are expected to include Hypothesis property-based tests
-  (`tests/test_fuzz.py`). This is a pending requirement — not yet implemented.
+- Tests include Hypothesis property-based tests
+  (`tests/test_fuzz.py`).
 - Devcontainer shell is fish, user `dev`; commits use Conventional Commits (see `git log`).
 
 ## UI design system

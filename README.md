@@ -52,7 +52,7 @@ project/
     ├── conftest.py          # Shared fixtures (async Textual pilot, AppState)
     ├── test_controller.py
     ├── test_course_repository.py
-    ├── test_fuzz.py          # Hypothesis property-based tests (pending)
+    ├── test_fuzz.py          # Hypothesis property-based tests
     └── test_views.py
 ```
 
