@@ -97,6 +97,52 @@ class TestCaseNormalization:
         assert len(list_courses()) == 1
 
 
+from controllers.course_controller import validate_course
+
+printable_text = st.text(
+    alphabet=st.characters(blacklist_categories=("Cs", "Cc"), min_codepoint=32),
+    min_size=4,
+    max_size=40,
+)
+valid_field_text = printable_text.filter(lambda s: len(s.strip()) > 3)
+valid_semesters = st.integers(min_value=1, max_value=8)
+
+
+class TestValidateCourseFuzz:
+    @given(name=valid_field_text, lecturer=valid_field_text, semester=valid_semesters)
+    def test_sufficiently_long_fields_are_accepted_without_crashing(
+        self, name: str, lecturer: str, semester: int
+    ) -> None:
+        course = create_course("EEI3372")
+        course.name = name
+        course.lecturer = lecturer
+        course.semester = semester
+        validated = validate_course(course)
+        assert len(validated.name) > 3
+        assert len(validated.lecturer) > 3
+        assert validated.semester == semester
+        assert validated.name == validated.name.strip()
+        assert validated.lecturer == validated.lecturer.strip()
+
+    @given(name=st.text(max_size=3))
+    def test_name_at_or_under_three_chars_always_rejected(self, name: str) -> None:
+        course = create_course("EEI3372")
+        course.name = name
+        course.lecturer = "Dr Fuzz"
+        course.semester = 1
+        with pytest.raises(CourseError):
+            validate_course(course)
+
+    @given(semester=st.integers().filter(lambda s: s <= 0 or s >= 9))
+    def test_semester_outside_1_to_8_always_rejected(self, semester: int) -> None:
+        course = create_course("EEI3372")
+        course.name = "Fuzz course"
+        course.lecturer = "Dr Fuzz"
+        course.semester = semester
+        with pytest.raises(CourseError, match="between 1 and 8"):
+            validate_course(course)
+
+
 CODE_POOL = [
     "EEI1172",
     "EEI2262",

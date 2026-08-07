@@ -2,7 +2,7 @@ import pytest
 from textual.widgets import Button, DataTable, Input, Label
 
 from controllers import CourseDTO
-from data import course_exists, get_course
+from data import course_exists, get_course, remove_course
 from views import (
     CourseActionModal,
     CourseDeleteConfirmModal,
@@ -120,6 +120,20 @@ class TestCreateCourseNameLecturerSemesterView:
         await screen2_pilot.pause()
         assert type(screen2_pilot.app.screen).__name__ == "HomeView"
         assert course_exists("EEI3372")
+
+    @pytest.mark.asyncio
+    async def test_semester_upper_boundary_accepted(self, screen2_pilot):
+        await screen2_pilot.press(*"Digital Systems")
+        await screen2_pilot.press("tab")
+        await screen2_pilot.press(*"John Smith")
+        await screen2_pilot.press("tab")
+        await screen2_pilot.press(*"8")
+        await screen2_pilot.press("enter")
+        await screen2_pilot.pause()
+        assert type(screen2_pilot.app.screen).__name__ == "HomeView"
+        stored = get_course("EEI3372")
+        assert stored is not None
+        assert stored.semester == 8
 
     @pytest.mark.asyncio
     async def test_re_add_resets_course_state(self, screen2_pilot, app):
@@ -452,6 +466,28 @@ class TestCourseActionModal:
         await pilot.pause()
         assert isinstance(pilot.app.screen, CourseListView)
 
+    @pytest.mark.asyncio
+    async def test_selecting_second_row_targets_that_course_not_the_first(
+        self, seeded_pilot
+    ):
+        pilot = seeded_pilot
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#courses-table")
+        await pilot.press("down")  # move cursor off row 0 (EEI3372) onto row 1 (EEI2262)
+        await pilot.press("enter")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseActionModal)
+        await pilot.click("#delete")
+        await pilot.pause()
+        await pilot.click("#yes")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseListView)
+        assert get_course("EEI2262") is None
+        assert get_course("EEI3372") is not None
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert {rk.value for rk in table.rows} == {"EEI3372"}
+
 
 class TestCourseDeleteConfirmModal:
     @staticmethod
@@ -500,6 +536,17 @@ class TestCourseDeleteConfirmModal:
         assert get_course("EEI3372") is None
         table = pilot.app.screen.query_one("#courses-table", DataTable)
         assert {rk.value for rk in table.rows} == {"EEI2262"}
+
+    @pytest.mark.asyncio
+    async def test_yes_after_course_already_removed_notifies_and_stays_on_action_modal(
+        self, seeded_pilot
+    ):
+        pilot = seeded_pilot
+        await self._open_confirm_modal(pilot)
+        remove_course("EEI3372")  # simulate concurrent removal before confirming
+        await pilot.click("#yes")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseActionModal)
 
 
 class TestUpdateCourseView:
@@ -550,6 +597,21 @@ class TestUpdateCourseView:
         stored = get_course("EEI3372")
         assert stored is not None
         assert stored.name == "Digital systems"
+
+    @pytest.mark.asyncio
+    async def test_invalid_semester_text_shows_error_and_keeps_course(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_form(pilot)
+        pilot.app.screen.query_one("#semester", Input).value = "abc"
+        await pilot.pause()
+        await pilot.click("#submit")
+        await pilot.pause()
+        error = pilot.app.screen.query_one("#error", Label)
+        assert "-visible" in error.classes
+        assert "between 1 and 8" in str(error.content)
+        stored = get_course("EEI3372")
+        assert stored is not None
+        assert stored.semester == 2
 
     @pytest.mark.asyncio
     async def test_reset_restores_original_values(self, seeded_pilot):

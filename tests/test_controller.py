@@ -183,6 +183,41 @@ class TestRegisterCourse:
         with pytest.raises(CourseError, match="already exists"):
             register_course(course2)
 
+    @pytest.mark.parametrize(
+        ("name", "lecturer"),
+        [
+            ("ABC", "John Smith"),       # name exactly 3 chars -> still rejected
+            ("Digital Systems", "ABC"),  # lecturer exactly 3 chars -> still rejected
+        ],
+    )
+    def test_name_and_lecturer_exact_length_boundary_rejected(
+        self, name: str, lecturer: str
+    ) -> None:
+        course = self._make_course("EEI2372", name, 1, lecturer)
+        with pytest.raises(CourseError, match="longer than 3"):
+            register_course(course)
+
+    @pytest.mark.parametrize(
+        ("name", "lecturer"),
+        [
+            ("ABCD", "John Smith"),        # name exactly 4 chars -> minimum accepted
+            ("Digital Systems", "ABCD"),   # lecturer exactly 4 chars -> minimum accepted
+        ],
+    )
+    def test_name_and_lecturer_minimum_length_accepted(
+        self, name: str, lecturer: str
+    ) -> None:
+        course = self._make_course("EEI2372", name, 1, lecturer)
+        register_course(course)
+        assert course_exists("EEI2372")
+
+    def test_semester_upper_boundary_accepted(self) -> None:
+        course = self._make_course("EEI2372", "Digital Systems", 8, "John Smith")
+        register_course(course)
+        stored = get_course("EEI2372")
+        assert stored is not None
+        assert stored.semester == 8
+
 
 class TestUpdateCourse:
     @staticmethod
