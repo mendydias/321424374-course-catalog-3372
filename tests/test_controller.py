@@ -4,6 +4,7 @@ from controllers import (
     CourseDTO,
     CourseError,
     create_course,
+    delete_course,
     get_course as controller_get_course,
     list_courses,
     register_course,
@@ -265,6 +266,27 @@ class TestUpdateCourse:
         stored = get_course("EEI3372")
         assert stored is not None
         assert stored == original
+
+
+class TestDeleteCourse:
+    @staticmethod
+    def _register_base(code: str = "EEI3372") -> Course:
+        course = create_course(code)
+        course.name = "Digital systems"
+        course.semester = 2
+        course.lecturer = "John Smith"
+        register_course(course)
+        return course
+
+    def test_delete_existing_course(self) -> None:
+        self._register_base()
+        delete_course("EEI3372")
+        assert not course_exists("EEI3372")
+        assert get_course("EEI3372") is None
+
+    def test_delete_nonexistent_course_raises(self) -> None:
+        with pytest.raises(CourseError, match="not found"):
+            delete_course("EEI3372")
 
 
 class TestGetCourse:

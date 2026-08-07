@@ -3,7 +3,14 @@ from textual.widgets import Button, DataTable, Input, Label
 
 from controllers import CourseDTO
 from data import course_exists, get_course
-from views import CourseActionModal, CourseListView, HomeView, UpdateCourseView, filter_courses
+from views import (
+    CourseActionModal,
+    CourseDeleteConfirmModal,
+    CourseListView,
+    HomeView,
+    UpdateCourseView,
+    filter_courses,
+)
 
 
 class TestHomeView:
@@ -444,6 +451,55 @@ class TestCourseActionModal:
         await pilot.press("escape")
         await pilot.pause()
         assert isinstance(pilot.app.screen, CourseListView)
+
+
+class TestCourseDeleteConfirmModal:
+    @staticmethod
+    async def _open_confirm_modal(pilot) -> None:
+        await pilot.click("#view-courses")
+        await pilot.pause()
+        await pilot.click("#courses-table")
+        await pilot.press("enter")
+        await pilot.pause()
+        await pilot.click("#delete")
+        await pilot.pause()
+
+    @pytest.mark.asyncio
+    async def test_delete_button_opens_confirm_modal(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_confirm_modal(pilot)
+        assert isinstance(pilot.app.screen, CourseDeleteConfirmModal)
+        pilot.app.screen.query_one("#yes", Button)
+        pilot.app.screen.query_one("#no", Button)
+
+    @pytest.mark.asyncio
+    async def test_no_keeps_course_and_returns_to_action_modal(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_confirm_modal(pilot)
+        await pilot.click("#no")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseActionModal)
+        assert get_course("EEI3372") is not None
+
+    @pytest.mark.asyncio
+    async def test_escape_keeps_course_and_returns_to_action_modal(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_confirm_modal(pilot)
+        await pilot.press("escape")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseActionModal)
+        assert get_course("EEI3372") is not None
+
+    @pytest.mark.asyncio
+    async def test_yes_deletes_course_and_returns_to_list(self, seeded_pilot):
+        pilot = seeded_pilot
+        await self._open_confirm_modal(pilot)
+        await pilot.click("#yes")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, CourseListView)
+        assert get_course("EEI3372") is None
+        table = pilot.app.screen.query_one("#courses-table", DataTable)
+        assert {rk.value for rk in table.rows} == {"EEI2262"}
 
 
 class TestUpdateCourseView:

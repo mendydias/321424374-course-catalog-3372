@@ -9,6 +9,7 @@ from data import (
     get_department,
     list_courses as _repo_list_courses,
     list_departments,
+    remove_course as _repo_remove_course,
     update_course as _repo_update_course,
 )
 from models import Course
@@ -100,6 +101,15 @@ def update_course(course: Course) -> Course:
     except CourseRepoError as e:
         raise CourseError(str(e)) from e
     return course
+
+
+def delete_course(code: str) -> None:
+    if not course_exists(code):
+        raise CourseError(f"Course with code '{code}' not found.")
+    try:
+        _repo_remove_course(code)
+    except CourseRepoError as e:
+        raise CourseError(str(e)) from e
 
 
 def get_course(code: str) -> Course:

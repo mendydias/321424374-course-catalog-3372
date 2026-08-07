@@ -50,6 +50,16 @@ Button.-primary:hover {
     background: #7aa2ff;
 }
 
+Button.-error {
+    background: #ff5c5c;
+    color: #0e0f13;
+}
+
+Button.-error:hover {
+    background: #ff5c5c 80%;
+    color: #0e0f13;
+}
+
 /* --- Inputs ----------------------------------------------------------- */
 
 Input {

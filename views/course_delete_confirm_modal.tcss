@@ -1,0 +1,16 @@
+CourseDeleteConfirmModal {
+    align: center middle;
+    background: #14161c 80%;
+}
+
+#dialog {
+    width: 40;
+    height: auto;
+    padding: 1 2;
+    background: #1c1f28;
+    border: round #363c4c;
+}
+
+#question {
+    padding-bottom: 1;
+}
