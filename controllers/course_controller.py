@@ -67,9 +67,7 @@ def validate_course(course: Course) -> Course:
 
     semester = course.semester
     if semester <= 0 or semester >= 9:
-        raise CourseError(
-            f"Semester must be between 1 and 8, got {semester}."
-        )
+        raise CourseError(f"Semester must be between 1 and 8, got {semester}.")
     course.semester = semester
 
     lecturer = course.lecturer.strip()

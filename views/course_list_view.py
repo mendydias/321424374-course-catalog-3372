@@ -42,7 +42,9 @@ class CourseListView(Screen):
         with Vertical(id="table-card"):
             if self._courses:
                 yield Input(id="search", placeholder="Search")
-                yield DataTable(id="courses-table", cursor_type="row", zebra_stripes=True)
+                yield DataTable(
+                    id="courses-table", cursor_type="row", zebra_stripes=True
+                )
             else:
                 yield Label("Courses table is empty.", id="empty")
         yield Footer()
@@ -68,7 +70,7 @@ class CourseListView(Screen):
                 course.credits,
                 course.semester,
                 course.lecturer,
-                key=code,
+                key=course.code,
             )
 
     @on(Input.Changed, "#search")
@@ -77,8 +79,8 @@ class CourseListView(Screen):
 
     @on(DataTable.RowSelected, "#courses-table")
     def handle_row_selected(self, event: DataTable.RowSelected) -> None:
-        row = event.data_table.get_row(event.row_key)
-        self.app.push_screen(CourseActionModal(row[0]))
+        if event.row_key.value is not None:
+            self.app.push_screen(CourseActionModal(event.row_key.value))
 
     def on_screen_resume(self) -> None:
         if not self.query("#courses-table"):
@@ -87,4 +89,6 @@ class CourseListView(Screen):
         if not table.columns:
             return
         self._courses = list_courses()
-        self.populate_table(filter_courses(self._courses, self.query_one("#search", Input).value))
+        self.populate_table(
+            filter_courses(self._courses, self.query_one("#search", Input).value)
+        )
